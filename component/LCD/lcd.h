@@ -7,6 +7,12 @@
 #include <driverlib/gpio.h>     // GPIO_PIN_X
 #include <inc/hw_memmap.h>      // GPIO_PORTX_BASE
 
+
+#define MAX_X 800
+#define MAX_Y 480
+
+
+
 // constants for display initialization
 #define RST 0x10
 #define INITIAL_STATE (0x1F)
@@ -26,26 +32,14 @@
 #define LARGE_DISPLAY
 // #define SMALL_DISPLAY
 
-#ifdef LARGE_DISPLAY
-#define MAX_X 800
-#define MAX_Y 480
-#endif /* LARGE_DISPLAY */
-#ifdef  SMALL_DISPLAY
-#define MAX_X 480
-#define MAX_Y 272
-#endif /* SMALL_DISPLAY */
-
-
-/********************************************************************************
-     Elementary output functions  => speed optimized as inline
-*********************************************************************************/
+/********************************************************************************/
+inline void init_ports_display(void);
+/********************************************************************************/
 void write_command(unsigned char command);
 /********************************************************************************/
 inline void write_data(unsigned char data);
 /********************************************************************************/
 inline void window_set(int min_x,int min_y,int max_x,int max_y);
-/********************************************************************************/
-inline void init_ports_display(void);
 /********************************************************************************/
 void configure_display_controller_small (void); // 480 x 272 pixel
 /********************************************************************************/
@@ -53,4 +47,9 @@ void configure_display_controller_large (void); // 800 x 480 pixel ???
 /********************************************************************************/
 void configure_display_set_background_color(int color);
 /********************************************************************************/
-void configure_display_select_LCD (void);
+void configure_display_paint_line_horizontal(short startx, short stopx, short y, int color);
+/********************************************************************************/
+void configure_display_paint_line_vertical(short starty, short stopy, short x, int color);
+
+
+

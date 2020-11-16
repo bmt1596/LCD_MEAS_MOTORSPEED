@@ -43,18 +43,7 @@ inline void window_set(int min_x,int min_y,int max_x,int max_y)
     write_data(max_y >> 8);        // Set stop column address      (high byte)
     write_data(max_y);             // as above                     (low byte)
 }
-/********************************************************************************/
-inline void init_ports_display(void)
-{
-    // Set Port M Pins 0-7: used as Output of LCD Data
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOM);            // enable clock-gate Port M
-    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOM));     // wait until clock ready
-    GPIOPinTypeGPIOOutput(GPIO_PORTM_BASE, 0xFF);
-    // Set Port L Pins 0-4: used as Output of LCD Control signals:
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOL);  // Clock Port Q
-    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOL));
-    GPIOPinTypeGPIOOutput(GPIO_PORTL_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3| GPIO_PIN_4);
-}
+
 /********************************************************************************/
 void configure_display_controller_small (void) // 480 x 272 pixel
 {
@@ -131,6 +120,21 @@ void configure_display_controller_small (void) // 480 x 272 pixel
     write_command(SET_DISPLAY_ON);           // Set display on  manual p. 78
 }
 /********************************************************************************/
+inline void init_ports_display(void)
+{
+    // Set Port M Pins 0-7: used as Output of LCD Data
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOM);            // enable clock-gate Port M
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOM));     // wait until clock ready
+    GPIOPinTypeGPIOOutput(GPIO_PORTM_BASE, 0xFF);
+    // Set Port L Pins 0-4: used as Output of LCD Control signals:
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOL);  // Clock Port Q
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOL));
+    GPIOPinTypeGPIOOutput(GPIO_PORTL_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3| GPIO_PIN_4);
+
+    configure_display_controller_large();  // initalize and  configuration
+}
+/********************************************************************************/
+
 void configure_display_controller_large (void) // 800 x 480 pixel ???
 {
 //////////////////////////////////////////////////////////////////////////////////
@@ -206,17 +210,6 @@ void configure_display_controller_large (void) // 800 x 480 pixel ???
     write_command(SET_DISPLAY_ON);           // Set display on  manual p. 78
 }
 
-void configure_display_select_LCD(void)
-{
-    // Display initialization
-    #ifdef LARGE_DISPLAY
-        configure_display_controller_large();  // initalize and  configuration
-    #endif /* LARGE_DISPLAY */
-    #ifdef SMALL_DISPLAY
-        configure_display_controller_small();  // initalize and  configuration
-    #endif /* SMALL_DISPLAY */
-}
-
 void configure_display_set_background_color(int color)
 {
     int x, y;
@@ -232,6 +225,32 @@ void configure_display_set_background_color(int color)
             write_data((color) & 0xff); // blue
         }
     printf("Background ready \n"); // for debug only
+}
+
+void configure_display_paint_line_horizontal(short startx, short stopx, short y, int color)
+{
+    int x;
+    window_set(startx, y, stopx, y);
+    write_command(0x2C);
+    for(x = startx; x <= stopx; x++)
+    {
+        write_data((color >> 16) & 0xff); // red
+        write_data((color >> 8) & 0xff); // green
+        write_data((color) & 0xff); // blue
+    }
+}
+
+void configure_display_paint_line_vertical(short starty, short stopy, short x, int color)
+{
+    int y;
+    window_set(x, starty, x, stopy);
+    write_command(0x2C);
+    for(y = starty; y <= stopy; y++)
+    {
+        write_data((color >> 16) & 0xff); // red
+        write_data((color >> 8) & 0xff); // green
+        write_data((color) & 0xff); // blue
+    }
 }
 
 
