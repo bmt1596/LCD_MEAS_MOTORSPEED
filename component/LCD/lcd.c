@@ -7,6 +7,7 @@
 
 
 #include "lcd.h"
+#include "fontscharacter.h"
 
 int x = 0;
 int y = 0;
@@ -210,7 +211,7 @@ void configure_display_controller_large (void) // 800 x 480 pixel ???
     write_command(SET_DISPLAY_ON);           // Set display on  manual p. 78
 }
 
-void configure_display_set_background_color(int color)
+void set_background_color(int color)
 {
     int x, y;
     printf("Start Background Pixel by Pixel set\n"); // for debug only
@@ -220,40 +221,353 @@ void configure_display_set_background_color(int color)
     for (x = 0; x <= (MAX_X) - 1; x++)
         for (y = 0; y <= (MAX_Y) - 1; y++)
         {
-            write_data((color >> 16) & 0xff); // red
-            write_data((color >> 8) & 0xff); // green
-            write_data((color) & 0xff); // blue
+            write_data((color >> 16) & 0xff);   // red
+            write_data((color >> 8) & 0xff);    // green
+            write_data((color) & 0xff);         // blue
         }
     printf("Background ready \n"); // for debug only
 }
 
-void configure_display_paint_line_horizontal(short startx, short stopx, short y, int color)
+void drawline_H(short x1, short x2, short y, int color , int px)
 {
-    int x;
-    window_set(startx, y, stopx, y);
+    int x, y_i;
+    window_set(x1, y, x2, y + px);
     write_command(0x2C);
-    for(x = startx; x <= stopx; x++)
+    for(x = x1; x <= x2; x++)
     {
+        for (y_i = y; y_i <= y + px; y_i ++)
+        {
+            write_data((color >> 16) & 0xff); // red
+            write_data((color >> 8) & 0xff); // green
+            write_data((color) & 0xff); // blue
+        }
+    }
+}
+
+void drawline_V(short y1, short y2, short x, int color , int px)
+{
+    int x_i, y;
+    window_set(x, y1, x + px, y2);
+    write_command(0x2C);
+    for (x_i = x; x_i <= x + px; x_i ++)
+    {
+        for(y = y1; y <= y2; y++)
+        {
+            write_data((color >> 16) & 0xff); // red
+            write_data((color >> 8) & 0xff);// green
+            write_data((color) & 0xff);// blue
+        }
+    }
+}
+
+void drawCircle(int x, int y, int radius, int color)
+{
+    int f = 1 - radius;
+    int ddF_x = 1;
+    int ddF_y = -2 * radius;
+    int x1 = 0;
+    int y1 = radius;
+
+
+    window_set(x, y + radius, x, y + radius);
+    write_command(0x2C);
+
+    write_data((color >> 16) & 0xff); // red
+    write_data((color >> 8) & 0xff); // green
+    write_data((color) & 0xff); // blue
+
+    window_set(x, y - radius, x, y - radius);
+    write_command(0x2C);
+    write_data((color >> 16) & 0xff); // red
+    write_data((color >> 8) & 0xff); // green
+    write_data((color) & 0xff); // blue
+
+    window_set(x + radius, y, x + radius, y);
+    write_command(0x2C);
+    write_data((color >> 16) & 0xff); // red
+    write_data((color >> 8) & 0xff); // green
+    write_data((color) & 0xff); // blue
+
+
+    window_set(x - radius, y, x - radius, y);
+    write_command(0x2C);
+    write_data((color >> 16) & 0xff); // red
+    write_data((color >> 8) & 0xff); // green
+    write_data((color) & 0xff); // blue
+
+
+    while (x1 < y1)
+    {
+        if (f >= 0)
+        {
+            y1--;
+            ddF_y += 2;
+            f += ddF_y;
+        }
+        x1++;
+        ddF_x += 2;
+        f += ddF_x;
+
+        window_set(x + x1, y + y1, x + x1, y + y1);
+        write_command(0x2C);
+        write_data((color >> 16) & 0xff); // red
+        write_data((color >> 8) & 0xff); // green
+        write_data((color) & 0xff); // blue
+
+
+        window_set(x - x1, y + y1, x - x1, y + y1);
+        write_command(0x2C);
+        write_data((color >> 16) & 0xff); // red
+        write_data((color >> 8) & 0xff); // green
+        write_data((color) & 0xff); // blue
+
+
+        window_set(x + x1, y - y1, x + x1, y - y1);
+        write_command(0x2C);
+        write_data((color >> 16) & 0xff); // red
+        write_data((color >> 8) & 0xff); // green
+        write_data((color) & 0xff); // blue
+
+
+        window_set(x - x1, y - y1, x - x1, y - y1);
+        write_command(0x2C);
+        write_data((color >> 16) & 0xff); // red
+        write_data((color >> 8) & 0xff); // green
+        write_data((color) & 0xff); // blue
+
+
+        window_set(x + y1, y + x1, x + y1, y + x1);
+        write_command(0x2C);
+        write_data((color >> 16) & 0xff); // red
+        write_data((color >> 8) & 0xff); // green
+        write_data((color) & 0xff); // blue
+
+
+        window_set(x - y1, y + x1, x - y1, y + x1);
+        write_command(0x2C);
+        write_data((color >> 16) & 0xff); // red
+        write_data((color >> 8) & 0xff); // green
+        write_data((color) & 0xff); // blue
+
+
+        window_set(x + y1, y - x1, x + y1, y - x1);
+        write_command(0x2C);
+        write_data((color >> 16) & 0xff); // red
+        write_data((color >> 8) & 0xff); // green
+        write_data((color) & 0xff); // blue
+
+
+        window_set(x - y1, y - x1, x - y1, y - x1);
+        write_command(0x2C);
         write_data((color >> 16) & 0xff); // red
         write_data((color >> 8) & 0xff); // green
         write_data((color) & 0xff); // blue
     }
 }
 
-void configure_display_paint_line_vertical(short starty, short stopy, short x, int color)
+void drawCircle_px(int x, int y, int radius, int color, int px)
 {
-    int y;
-    window_set(x, starty, x, stopy);
-    write_command(0x2C);
-    for(y = starty; y <= stopy; y++)
+    int i;
+    for ( i = radius; i >= radius - px; i--)
     {
-        write_data((color >> 16) & 0xff); // red
-        write_data((color >> 8) & 0xff); // green
-        write_data((color) & 0xff); // blue
+        drawCircle(x, y, i, color);
     }
 }
 
+void write_char(int w, int color, int backcolor)
+{
+    int lv;
+    for (lv = 0; lv < 12; lv++)
+    {
+        if (w & 1)
+        {
+            write_data((color >> 16) & 0xff); // red
+            write_data((color >> 8) & 0xff); // green
+            write_data((color) & 0xff); // blue
+        }
+        else
+        {
+            write_data((backcolor >> 16) & 0xff); // red
+            write_data((backcolor >> 8) & 0xff); // green
+            write_data((backcolor) & 0xff); // blue
+        }
+        w = w>>1;
+    }
+}
 
+void print_string1216(char *text, int row, int column, int color, int backcolor)
+{
+    int w;
+    int lv1, numChar;
+    int length = strlen(text);
+    int font_width = 12;
+    int font_hight = 16;
+    int columnStart = column;
+    int columnStop = columnStart + font_width - 1;
+    int rowStart = row;
+    int rowStop = rowStart + font_hight - 1;
 
+    for (numChar = 0; numChar < length; numChar++)
+    {
+        window_set(columnStart, rowStart, columnStop, rowStop);
+        write_command(0x2C);
+        for (lv1 = 0; lv1 < 32; lv1 = lv1 + 2)
+        {
+            w = (font_12_16[text[numChar]][lv1 + 1] << 4)
+                    | (font_12_16[text[numChar]][lv1] >> 4);
+            write_char(w, color, backcolor);
+        }
+        columnStart += font_width;
+        columnStop += font_width;
+    }
+}
 
+/******************************************************************************************************/
+//draws a line from startpoint x to stoppoint y directly to the display
+void drawline(short x1, short y1, short x2, short y2, int color)
+{
+    short old_x, old_y, x, y, i;
+    int start_x, stop_x, start_y, stop_y;
+    double gain;
+
+    // 90° line:
+    if (x1 == x2)
+    {
+        if (y1 > y2)
+        {        // 90° from DOWN to UP   else: 270° from UP to DOWN
+            start_y = y2;
+            stop_y = y1;
+        }
+        else
+        {
+            start_y = y1;
+            stop_y = y2;
+        }
+        window_set(x1, start_y, x2, stop_y);
+        write_command(0x2C);
+        for (x = start_y; x <= stop_y; x++)
+        {
+            write_data((color >> 16) & 0xff); // red
+            write_data((color >> 8) & 0xff); // green
+            write_data((color) & 0xff); // blue
+        }
+    }
+    // 0° line:
+    else if (y1 == y2)
+    {
+        if (x1 > x2)
+        {
+            start_x = x2;
+            stop_x = x1;
+        }
+        else
+        {
+            start_x = x1;
+            stop_x = x2;
+        }
+        window_set(start_x, y1, stop_x, y2);
+        write_command(0x2C);
+        for (x = start_x; x <= stop_x; x++)
+        {
+            write_data((color >> 16) & 0xff); // red
+            write_data((color >> 8) & 0xff); // green
+            write_data((color) & 0xff); // blue
+        }
+    }
+/////////////////////////////////////////////////////////////////////////////////////////
+    else
+    {
+        if (x1 > x2)
+        {      // running direction is negative ! => switch start and stop
+            start_x = x2;
+            stop_x = x1;
+            start_y = y2;
+            stop_y = y1;
+        }
+        else
+        {
+            start_x = x1;
+            stop_x = x2;
+            start_y = y1;
+            stop_y = y2;
+        }
+        //(stop_y - start_y) can be positive or negative
+        gain = (double) (stop_y - start_y) / (stop_x - start_x);
+
+        if (gain >= 1)
+        {
+            old_y = start_y;
+
+            for (x = start_x; x <= stop_x; x++)
+            {
+                y = gain * (x - start_x) + start_y;
+                window_set(x, old_y, x, y);
+                write_command(0x2C);
+                for (i = old_y; i <= y; i++)
+                {
+                    write_data((color >> 16) & 0xff); // red
+                    write_data((color >> 8) & 0xff); // green
+                    write_data((color) & 0xff); // blue
+                }
+                old_y = y;
+            }
+        }
+        else if (gain > 0)
+        {
+            old_x = start_x;
+
+            for (y = start_y; y <= stop_y; y++)
+            {
+                x = (y - start_y) / gain + start_x;
+                window_set(old_x, y, x, y);
+                write_command(0x2C);
+                for (i = old_x; i <= x; i++)
+                {
+                    write_data((color >> 16) & 0xff); // red
+                    write_data((color >> 8) & 0xff); // green
+                    write_data((color) & 0xff); // blue
+                }
+                old_x = x;
+            }
+        }
+
+        else if (gain <= -1)
+        {
+            old_y = start_y;
+
+            for (x = start_x; x <= stop_x; x++)
+            {
+                y = gain * (x - start_x) + start_y;
+                window_set(x, y, x, old_y);
+                write_command(0x2C);
+                for (i = y; i <= old_y; i++)
+                {
+                    write_data((color >> 16) & 0xff); // red
+                    write_data((color >> 8) & 0xff); // green
+                    write_data((color) & 0xff); // blue
+                }
+                old_y = y;
+            }
+        }
+        // start_y > stop_y
+        else if (gain < 0)
+        {
+            old_x = start_x;
+
+            for (y = start_y; y >= stop_y; y--)
+            {
+                x = (y - start_y) / gain + start_x;
+                window_set(old_x, y, x, y);
+                write_command(0x2C);
+                for (i = old_x; i <= x; i++)
+                {
+                    write_data((color >> 16) & 0xff); // red
+                    write_data((color >> 8) & 0xff); // green
+                    write_data((color) & 0xff); // blue
+                }
+                old_x = x;
+            }
+        }
+    }
+}
 

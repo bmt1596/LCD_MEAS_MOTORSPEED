@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <string.h>
 #include <stdbool.h> // type bool for giop.h
 #include "inc/hw_types.h"
 #include "inc/tm4c1294ncpdt.h"
@@ -6,7 +7,6 @@
 #include <driverlib/sysctl.h>
 #include <driverlib/gpio.h>     // GPIO_PIN_X
 #include <inc/hw_memmap.h>      // GPIO_PORTX_BASE
-
 
 #define MAX_X 800
 #define MAX_Y 480
@@ -45,11 +45,21 @@ void configure_display_controller_small (void); // 480 x 272 pixel
 /********************************************************************************/
 void configure_display_controller_large (void); // 800 x 480 pixel ???
 /********************************************************************************/
-void configure_display_set_background_color(int color);
+void set_background_color(int color);
 /********************************************************************************/
-void configure_display_paint_line_horizontal(short startx, short stopx, short y, int color);
+void drawline_H(short x1, short x2, short y, int color , int px);
 /********************************************************************************/
-void configure_display_paint_line_vertical(short starty, short stopy, short x, int color);
+void drawline_V(short y1, short y2, short x, int color , int px);
+/********************************************************************************/
+void write_char(int w, int color1, int color2);
+/********************************************************************************/
+void print_string1216(char *text, int row, int column, int color, int backcolor);
+/********************************************************************************/
+void drawCircle(int x, int y, int radius, int color);
+/********************************************************************************/
+void drawCircle_px(int x, int y, int radius, int color, int px);
+/********************************************************************************/
+void drawline(short x1, short y1, short x2, short y2, int color);
 
 
 

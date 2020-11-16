@@ -1,62 +1,96 @@
-#include <stdint.h>
-#include <stdbool.h> // type bool for giop.h
-#include "inc/hw_types.h"
-#include "inc/tm4c1294ncpdt.h"
-#include <stdio.h>   // Debug only
-#include <driverlib/sysctl.h>
-#include <driverlib/gpio.h>     // GPIO_PIN_X
-#include <inc/hw_memmap.h>      // GPIO_PORTX_BASE
+#include <component/LCD/lcd.h>
+#include <component/Sensor/sensor.h>
+#include <stdio.h>
 
-// import LCD Header form Folder
-#include "component/LCD/lcd.h"
-#include "component/Sensor/sensor.h"
+
 
 // some predefined basic colors to use with names
-enum colors
-{
-    BLACK = 0x00000000,
-    WHITE = 0x00FFFFFF,
-    GREY = 0x00AAAAAA,
-    RED = 0x00FF0000,
-    GREEN = 0x0000FF00,
-    BLUE = 0x000000FF,
-    YELLOW = 0x00FFFF00,
-};
+int colorarray[] = { 0x00000000,  //  BLACK 0
+            0x00FFFFFF,     //  WHITE 1
+            0x00AAAAAA,     //  GREY 2
+            0x00FF0000,     //  RED 3
+            0x0000FF00,     //  GREEN 4
+            0x000000FF,     //  BLUE 5
+            0x00FFFF00,     //  YELLOW 6
+            0x0036454F,     //   Graun 7
+            };
 
-int colorarray[] = { 0x00000000,  //  BLACK
-        0x00FFFFFF,  //  WHITE
-        0x00AAAAAA,  //  GREY
-        0x00FF0000,  //  RED
-        0x0000FF00,  //  GREEN
-        0x000000FF,  //  BLUE
-        0x00FFFF00,  //  YELLOW
-        };
+void init_and_paintbackground(void);
 
 // same values as array for indexed colors
-
-
 // Variable zum Auslesen des Systemtaktes
 uint32_t sysClock;
+
+void init_and_paintbackground(void)
+{
+    // Init Port L for Display Control and Port M for Display Data
+    init_ports_display();
+    // Display initialization
+    set_background_color(colorarray[0]);
+
+
+    // drawline_H(0, 800, 200, colorarray[0], 2);
+
+    drawline_V(0, 480, 550, colorarray[1], 2);
+
+    // Header
+    print_string1216("                    Fahzeug-Informations-Display                   ", 0, 0, colorarray[1], colorarray[5]);
+
+    // vong tron mau vang
+    drawCircle_px(275, 270, 225, colorarray[6], 2);
+
+    // unter black line
+    drawline_H(0, 550, 390, colorarray[0], 100);
+
+    // ausser Kreis
+    drawCircle_px(275, 270, 235, colorarray[1], 2);
+    // mitteln Punk
+    drawCircle_px(275, 270, 5, colorarray[1], 3);
+
+    drawCircle_px(275, 270, 30, colorarray[6], 1);
+
+    // unter black line
+    drawline_H(0, 550, 470, colorarray[0], 10);
+    drawline_H(154, 395, 470, colorarray[1], 2);
+
+    // gach vang va so
+    drawline_V(48, 65, 275, colorarray[3], 1);
+    print_string1216("120", 75, 257, colorarray[6], colorarray[0]);
+
+    drawline_H(53,70, 270, colorarray[3], 1);
+    print_string1216("30", 265, 78 , colorarray[6], colorarray[0]);
+
+    drawline_H(479,496, 270, colorarray[3], 1);
+    print_string1216("210", 265, 437 , colorarray[6], colorarray[0]);
+
+    // void write_line(short x1, short y1, short x2, short y2, int color)
+    drawline(88, 390,105, 382, colorarray[3]);
+    print_string1216("0", 368, 108, colorarray[6], colorarray[0]);
+
+
+    //number on display
+    print_string1216("Km/h", 380, 253, colorarray[1], colorarray[0]);
+
+    print_string1216("000,00", 400, 245, colorarray[0], colorarray[6]);
+
+
+}
+
+void wait(int time){
+    volatile int tmp;
+
+    for(tmp = 0; tmp < 10800*time; tmp++); // ~ 1ms
+}
 
 void main(void)
 {
     int i, j, x, y;
-    enum colors color;
 
     // Set system frequency to 120 MHz
-    sysClock = SysCtlClockFreqSet(
-            SYSCTL_OSC_INT | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480, 120000000);
+    sysClock = SysCtlClockFreqSet(SYSCTL_OSC_INT | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480, 120000000);
 
     configPorts(); // Init Port N for User LED and Port P for digital Input from Motor
-    init_ports_display(); // Init Port L for Display Control and Port M for Display Data
-
-    // Display initialization
-    configure_display_set_background_color(colorarray[1]);
-
-    configure_display_paint_line_horizontal(0,800,200,colorarray[0]);
-
-    configure_display_paint_line_vertical(0,480,600,colorarray[0]);
-
+    init_and_paintbackground();
     j = 0;
 
     // Start endless loop
@@ -75,6 +109,7 @@ void main(void)
                 write_command(0x2C); //write pixel command
                 color = colorarray[(j) % 7];
                 j++; // change color
+
                 for (i = 0; i < (15 * 15); i++) // set pixels
                 {
                     write_data((color >> 16) & 0xff); // red
@@ -84,5 +119,15 @@ void main(void)
             }
     }
     */
+
+    drawline(275, 270 ,120, 350, colorarray[3]);
+    float f = 0;
+
+    while (1)
+       {
+           // Test Motor and Display
+           printf("Write rectangles\n"); // for debug only
+           GPIO_PORTN_DATA_R = GPIO_PORTP_DATA_R & 0x03;
+       }
 
 }
