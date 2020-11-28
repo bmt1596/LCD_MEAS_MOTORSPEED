@@ -12,7 +12,7 @@ int colorarray[] = { 0x00000000,  //  BLACK 0
             0x0000FF00,     //  GREEN 4
             0x000000FF,     //  BLUE 5
             0x00FFFF00,     //  YELLOW 6
-            0x0036454F,     //   Graun 7
+            0x0036454F,     //  Graun 7
             };
 
 void init_and_paintbackground(void);
