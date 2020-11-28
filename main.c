@@ -13,6 +13,7 @@ int colorarray[] = { 0x00000000,  //  BLACK 0
             0x000000FF,     //  BLUE 5
             0x00FFFF00,     //  YELLOW 6
             0x0036454F,     //  Graun 7
+            0x00121234,     // Test
             };
 // add
 
