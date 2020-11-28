@@ -14,6 +14,7 @@ int colorarray[] = { 0x00000000,  //  BLACK 0
             0x00FFFF00,     //  YELLOW 6
             0x0036454F,     //  Graun 7
             };
+// add
 
 void init_and_paintbackground(void);
 void displayzahl_and_kreis(void);
