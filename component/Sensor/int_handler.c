@@ -5,7 +5,9 @@
  *      Author: Hauke
  */
 
+#include "int_handler.h"
 
-void intPortPHandler(void){
-
+void IntPortPHandler(void){
+    direction = BACKWARD;
+    //printf("Interrupt");
 }

@@ -55,6 +55,7 @@ extern uint32_t __STACK_TOP;
 //
 //*****************************************************************************
 // To be added by user
+extern void IntPortPHandler(void);       //Own interrupt handler
 
 //*****************************************************************************
 //
@@ -159,7 +160,7 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // GPIO Port N
     IntDefaultHandler,                      // Fan 0
     IntDefaultHandler,                      // Tamper
-    IntDefaultHandler,                      // GPIO Port P (Summary or P0)
+    IntPortPHandler,                      // GPIO Port P (Summary or P0)
     IntDefaultHandler,                      // GPIO Port P1
     IntDefaultHandler,                      // GPIO Port P2
     IntDefaultHandler,                      // GPIO Port P3

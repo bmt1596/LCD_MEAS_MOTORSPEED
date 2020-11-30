@@ -2,8 +2,6 @@
 #include <component/Sensor/sensor.h>
 #include <stdio.h>
 
-
-
 // some predefined basic colors to use with names
 int colorarray[] = { 0x00000000,  //  BLACK 0
             0x00FFFFFF,     //  WHITE 1
@@ -146,11 +144,21 @@ void main(void)
 
     drawline(275, 270 ,120, 350, colorarray[3]);
 
+    // Test Area //
+
+    // --------- //
+
     while (1)
        {
            // Test Motor and Display
-           printf("Write rectangles\n"); // for debug only
-           GPIO_PORTN_DATA_R = GPIO_PORTP_DATA_R & 0x03;
+           //printf("Write rectangles\n"); // for debug only
+           //GPIO_PORTN_DATA_R = GPIO_PORTP_DATA_R & 0x03;
+        /*if (i % 1 == 0)
+            {
+            configPorts();
+            }
+           i++;*/
        }
 
 }
+
