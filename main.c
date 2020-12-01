@@ -11,7 +11,6 @@ int colorarray[] = { 0x00000000,  //  BLACK 0
             0x000000FF,     //  BLUE 5
             0x00FFFF00,     //  YELLOW 6
             0x0036454F,     //  Graun 7
-            0x00121234,     // Test
             };
 // add
 
@@ -63,14 +62,10 @@ void display_information(void)
     print_string1216("2. Hauke Kosmiter",
                         125, 565, colorarray[1], colorarray[0]);
 
-
-
 }
 
 void displayzahl_and_kreis(void)
 {
-
-
     display_information();
     // gach do va so
     // void write_line(short x1, short y1, short x2, short y2, int color)
