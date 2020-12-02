@@ -70,19 +70,26 @@ void main(void)
     display_layout();
 
     // test funtion to display the number and red line
+    for (i = 0; i <= 240; i++)
+    {
+        geschwindigkeit = i;
+        wait(10);
+        display_number_and_line();
+    }
+
+    for (i = 240; i >= 0; i--)
+    {
+        geschwindigkeit = i;
+        wait(2);
+        display_number_and_line();
+    }
+
     while (1)
        {
-        i++;
-        geschwindigkeit = i;
-        wait(50);
-        display_number_and_line();
-        if(i == 240)
-        {
-            i = 0;
-        }
-           // Test Motor and Display
-           //printf("Write rectangles\n"); // for debug only
-           //GPIO_PORTN_DATA_R = GPIO_PORTP_DATA_R & 0x03;
+        //Test Motor and Display
+        //printf("Write rectangles\n"); // for debug only
+        //GPIO_PORTN_DATA_R = GPIO_PORTP_DATA_R & 0x03;
+
        }
 }
 
