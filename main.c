@@ -1,6 +1,11 @@
 #include <component/LCD/lcd.h>
 #include <component/Sensor/sensor.h>
 #include <stdio.h>
+#include <math.h>
+#define X_CENTER 275
+#define Y_CENTER 270
+#define PI 3.141596
+
 
 // some predefined basic colors to use with names
 int colorarray[] = { 0x00000000,  //  BLACK 0
@@ -12,19 +17,40 @@ int colorarray[] = { 0x00000000,  //  BLACK 0
             0x00FFFF00,     //  YELLOW 6
             0x0036454F,     //  Graun 7
             };
-// add
+// same values as array for indexed colors
+// Variable zum Auslesen des Systemtaktes
+uint32_t sysClock;
+uint32_t geschwindigkeit = 30;
+
 
 void init_and_paintbackground(void);
 void displayzahl_and_kreis(void);
 void display_number(void);
-
-
-
-// same values as array for indexed colors
-// Variable zum Auslesen des Systemtaktes
-uint32_t sysClock;
-
 void display_information(void);
+void display_zeiger(void);
+
+
+
+
+
+
+void display_zeiger(void)
+{
+    static uint16_t radius = 175;
+    static uint16_t phinull = 150;
+    static uint16_t phi;
+    static uint16_t x, y;
+
+    char buffer[20];
+    sprintf(buffer, "%3d km/h", geschwindigkeit);
+    print_string1216(buffer, 400, 245, colorarray[0], colorarray[6]);
+
+    phi = geschwindigkeit + phinull;
+    x = X_CENTER + round(radius* cos((double)(phi)*2*PI/360));
+    y = Y_CENTER + round(radius* sin((double)(phi)*2*PI/360));
+    drawline(X_CENTER, Y_CENTER , x, y, colorarray[3]);
+}
+
 
 
 void init_and_paintbackground(void)
@@ -33,10 +59,7 @@ void init_and_paintbackground(void)
     init_ports_display();
     // Display initialization
     displayzahl_and_kreis();
-
-    //number on display
-
-    display_number();
+    display_zeiger();
 }
 
 void display_information(void)
@@ -99,28 +122,23 @@ void displayzahl_and_kreis(void)
     print_string1216("Km/h", 135, 253, colorarray[1], colorarray[0]);
 
     // vong tron mau vang
-    drawCircle_px(275, 270, 222, colorarray[6], 3);
+    drawCircle_px(X_CENTER, Y_CENTER, 222, colorarray[6], 3);
 
     // unter black line
     drawline_H(0, 550, 390, colorarray[0], 100);
 
     // ausser Kreis
-    drawCircle_px(275, 270, 235, colorarray[1], 4);
+    drawCircle_px(X_CENTER, Y_CENTER, 235, colorarray[1], 4);
 
     // mitteln Punk
-    drawCircle_px(275, 270, 6, colorarray[1], 4);
+    drawCircle_px(X_CENTER, Y_CENTER, 6, colorarray[1], 4);
 
     // vong tron mau vang ben trong
-    drawCircle_px(275, 270, 30, colorarray[6], 2);
+    drawCircle_px(X_CENTER, Y_CENTER, 30, colorarray[6], 2);
 
     // unter black line
     drawline_H(0, 550, 470, colorarray[0], 10);
     drawline_H(154, 395, 470, colorarray[1], 3);
-}
-
-void display_number(void)
-{
-    print_string1216("000,00", 400, 245, colorarray[0], colorarray[6]);
 }
 
 void wait(int time){
@@ -131,19 +149,20 @@ void wait(int time){
 
 void main(void)
 {
-    int i, j, x, y;
+    int i;
 
     // Set system frequency to 120 MHz
     sysClock = SysCtlClockFreqSet(SYSCTL_OSC_INT | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480, 120000000);
 
     configPorts(); // Init Port N for User LED and Port P for digital Input from Motor
-    init_and_paintbackground();
 
     drawline(275, 270 ,120, 350, colorarray[3]);
+    init_and_paintbackground();
 
     // Test Area //
 
     // --------- //
+
 
     while (1)
        {
