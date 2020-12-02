@@ -11,8 +11,6 @@
 #define MAX_X 800
 #define MAX_Y 480
 
-
-
 // constants for display initialization
 #define RST 0x10
 #define INITIAL_STATE (0x1F)

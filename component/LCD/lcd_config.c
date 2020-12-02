@@ -6,7 +6,7 @@
  */
 
 
-#include "lcd.h"
+#include <component/LCD/lcd_config.h>
 #include "fontscharacter.h"
 
 int x = 0;
