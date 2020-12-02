@@ -121,7 +121,7 @@ void configure_display_controller_small (void) // 480 x 272 pixel
     write_command(SET_DISPLAY_ON);           // Set display on  manual p. 78
 }
 /********************************************************************************/
-inline void init_ports_display(void)
+inline void init_and_config_display(void)
 {
     // Set Port M Pins 0-7: used as Output of LCD Data
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOM);            // enable clock-gate Port M
