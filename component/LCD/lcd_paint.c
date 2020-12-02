@@ -49,19 +49,19 @@ void display_layout(void)
     print_string1216("240", 348, 420, COLOR_YELLO, COLOR_BLACK);
 
     // display gold circle
-    drawCircle_px(275, 270, 222, COLOR_YELLO, 3);
+    drawCircle_px(X_CENTER, Y_CENTER, 222, COLOR_YELLO, 3);
 
     // unter black line
     drawline_H(0, 550, 390, COLOR_BLACK, 100);
 
     // outside white circle
-    drawCircle_px(275, 270, 235, COLOR_WHITE, 4);
+    drawCircle_px(X_CENTER, Y_CENTER, 235, COLOR_WHITE, 4);
 
     // display center point
-    drawCircle_px(275, 270, 6, COLOR_WHITE, 4);
+    drawCircle_px(X_CENTER, Y_CENTER, 6, COLOR_WHITE, 4);
 
     // display gold insite circle
-    drawCircle_px(275, 270, 30, COLOR_YELLO, 2);
+    drawCircle_px(X_CENTER, Y_CENTER, 30, COLOR_YELLO, 2);
 
     // display under black line
     drawline_H(0, 550, 470, COLOR_BLACK, 10);

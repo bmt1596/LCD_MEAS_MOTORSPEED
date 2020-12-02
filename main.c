@@ -4,10 +4,6 @@
 #include <stdio.h>
 #include <math.h>
 
-#define X_CENTER 275
-#define Y_CENTER 270
-#define PI 3.141596
-
 //void display_layout(void);
 //void display_project_information(void);
 void display_number_and_line(void);

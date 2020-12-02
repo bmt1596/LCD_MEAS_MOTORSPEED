@@ -15,5 +15,10 @@
 #define COLOR_YELLO 0x00FFFF00
 #define COLOR_GOUND 0x0036454F
 
+#define X_CENTER 275
+#define Y_CENTER 270
+#define PI 3.141596
+
+
 void display_layout(void);
 void display_project_information(void);
