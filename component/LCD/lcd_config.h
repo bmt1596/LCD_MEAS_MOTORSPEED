@@ -11,8 +11,6 @@
 #define MAX_X 800
 #define MAX_Y 480
 
-
-
 // constants for display initialization
 #define RST 0x10
 #define INITIAL_STATE (0x1F)
@@ -33,7 +31,7 @@
 // #define SMALL_DISPLAY
 
 /********************************************************************************/
-inline void init_ports_display(void);
+inline void init_and_config_display(void);
 /********************************************************************************/
 void write_command(unsigned char command);
 /********************************************************************************/

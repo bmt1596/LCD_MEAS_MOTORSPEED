@@ -18,7 +18,7 @@
 #include <inc/hw_memmap.h>      // GPIO_PORTX_BASE
 
 // Init Port N for User LED and Port P for digital Input from Motor
-void configPorts(void);
+void init_and_config_sensor(void);
 
 
 #endif /* COMPONENT_SENSOR_SENSOR_H_ */

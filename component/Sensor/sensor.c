@@ -7,7 +7,7 @@
 
 #include "sensor.h"
 
-void configPorts(void)
+void init_and_config_sensor(void)
 {
     // Enable ports
     SYSCTL_RCGCGPIO_R |= 0x3000; // Port P
