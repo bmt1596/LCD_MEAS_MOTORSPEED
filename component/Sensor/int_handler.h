@@ -11,6 +11,8 @@
 // Global varibales for drving direction
 #define FORWARD 0
 #define BACKWARD 1
+
+void IntPortPHandler(void);
 volatile unsigned char direction = FORWARD;
 
 #endif /* COMPONENT_SENSOR_INT_HANDLER_H_ */
