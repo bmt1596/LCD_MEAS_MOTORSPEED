@@ -29,5 +29,4 @@ void timerLCD(void){
     TIMER0_APR_R = 5 - 1;               // Prescaler = ceil((0.02s*16MHz)/2^16) -1 = 5 - 1
     TIMER0_TAILR_R = 64000 - 1;         // Load Value = ceil((0.2s*16MHz)/5) - = 64000 - 1
     TIMER0_CTL_R |= 0x01;               // Enable Timer
-
 }
