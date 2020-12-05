@@ -8,7 +8,7 @@
 #ifndef COMPONENT_TIMER_TIMER_H_
 #define COMPONENT_TIMER_TIMER_H_
 
-
+volatile unsigned char globalCount = 0;
 
 
 
