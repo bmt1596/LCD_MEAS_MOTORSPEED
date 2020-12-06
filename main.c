@@ -1,5 +1,6 @@
 #include <component/LCD/lcd_config.h>
 #include <component/LCD/lcd_paint.h>
+#include <component/Sensor/int_handler.h>
 #include <component/Sensor/sensor.h>
 #include <stdio.h>
 #include <math.h>
@@ -66,6 +67,11 @@ void main(void)
     init_and_config_display();
     init_and_config_sensor();
 
+
+    // Test
+    //timerLCD();
+    // Test Ende
+
     // dis play complett number 0-240 and circle
     display_layout();
 
@@ -83,6 +89,7 @@ void main(void)
         wait(2);
         display_number_and_line();
     }
+
 
     while (1)
        {

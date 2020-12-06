@@ -13,6 +13,6 @@
 #define BACKWARD 1
 
 void IntPortPHandler(void);
-extern volatile unsigned char direction = FORWARD;
+volatile unsigned char direction;
 
 #endif /* COMPONENT_SENSOR_INT_HANDLER_H_ */
