@@ -95,7 +95,7 @@ void main(void)
        {
         //Test Motor and Display
         //printf("Write rectangles\n"); // for debug only
-        //GPIO_PORTN_DATA_R = GPIO_PORTP_DATA_R & 0x03;
+        GPIO_PORTN_DATA_R = GPIO_PORTP_DATA_R & 0x03;
 
        }
 }

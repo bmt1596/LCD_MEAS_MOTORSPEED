@@ -161,8 +161,8 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // GPIO Port N
     IntDefaultHandler,                      // Fan 0
     IntDefaultHandler,                      // Tamper
-    IntPortPHandler,                      // GPIO Port P (Summary or P0)
-    IntDefaultHandler,                      // GPIO Port P1
+    IntDefaultHandler,                      // GPIO Port P (Summary or P0)
+    IntPortPHandler,                      // GPIO Port P1
     IntDefaultHandler,                      // GPIO Port P2
     IntDefaultHandler,                      // GPIO Port P3
     IntDefaultHandler,                      // GPIO Port P4
