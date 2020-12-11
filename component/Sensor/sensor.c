@@ -21,14 +21,17 @@ void init_and_config_sensor(void)
 
     // Edge events are recommended to be ADC triggered
     //GPIO_PORTP_ADCCTL             //Enable ADC trigger?
+    GPIO_PORTP_IS_R |= 0xFF;        // Debug
     GPIO_PORTP_IS_R &= ~0x02;       // Clear P1 for activating edge sensitive
+    GPIO_PORTP_IBE_R |= 0xFF;       // Debug
     GPIO_PORTP_IBE_R &= ~0x02;      // Set P1 to trigger on single edge
-    GPIO_PORTP_IEV_R &= 0x00;       // Clear Register IEV
+    GPIO_PORTP_IEV_R |= 0x00;       // Clear Register IEV
     GPIO_PORTP_IEV_R |= 0x02;       // Set P1 to rising edge detecting
     GPIO_PORTP_ICR_R |= 0x02;       // Clear the interrupt to avoid that the interrupt handler is executed again without a trigger
     GPIO_PORTP_IM_R |= 0x02;        // Unmask P1
 
     NVIC_EN2_R = (1<<13);            // Enable Port P1 interrupt
+    printf("%#X\n", GPIO_PORTP_IEV_R);
 
 }
 

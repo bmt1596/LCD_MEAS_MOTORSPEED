@@ -7,6 +7,24 @@
 
 #include "timer.h"
 
+// Prototypes
+void tt_handler(void);
+void init_clock(void);
+/*
+ * Function to initiate the sysclock and enable the tt_handler
+ */
+void init_clock(void){
+    int sysClock;
+    sysClock = SysCtlClockFreqSet(SYSCTL_OSC_INT | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480, 120000000);
+    SysTickPeriodSet(sysClock);
+    SysTickIntRegister(tt_handler);
+    SysTickIntEnable();
+    printf("%i\n", sysClock);
+}
+void tt_handler(void){
+
+}
+
 void timerLCD(void){
     /*
      * The timer for updating the LCD Display
@@ -41,12 +59,13 @@ void timerLCD(void){
 }
 
 
-void egdeCountTimer(void){
+void edgeCountTimer(void){
     /*
      * The timer is counting the edge that are happens.
      * It's used to calculate the driven day kilometers
      */
 
+    printf("2\n2\n2\n");
     // Configure Port D
     SYSCTL_RCGCGPIO_R = 0x08;
     while(!(SYSCTL_PRGPIO_R & 0x08));
@@ -69,17 +88,18 @@ void egdeCountTimer(void){
     //TIMER0_BPR_R = 1 - 1;
     TIMER0_TBMATCHR_R = 2 - 1;           // Set Match Value to 1 so the difference between Load Value and Match value is 1
     TIMER0_CTL_R |= 0x02;               // Enable Timer
-
+    //printf("5");
     /*
      * While loop for counting the global
      * variable up and reset Timer
      */
-    while(1){
+    /*while(1){
         while((TIMER0_RIS_R & (1<<11)) == 0);   // Check if there is an edge-count
         //globalCount++;                          // Count global variable up
         TIMER0_RIS_R = (1<<11);                 // Clear match flag
         TIMER0_TBILR_R = 1 - 1;                 // Reset load value
-        }
+        }*/
+    printf("3\n3\n3\n");
     }
 
 

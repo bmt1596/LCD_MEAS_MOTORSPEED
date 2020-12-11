@@ -9,9 +9,14 @@
 //void display_project_information(void);
 void display_number_and_line(void);
 void wait(int time);
+//void edgeCountTimer(void);
+void tt_handler(void);
+void init_clock(void);
 
 uint32_t sysClock;
 uint32_t geschwindigkeit = 0;
+uint32_t global_count = 0;
+
 /*
  * Funktion zum display die Geschwindigkeit und die rote Line
 
@@ -58,15 +63,28 @@ void wait(int time)
 }
 
 
+// Function to calculate the kilometers of the day
+float clacKM(void){
+    // Wheels = 20'' = 50,8cm --> circumference = 159.593
+    float circumference = 159.593;
+    return circumference * global_count;
+}
+
+// Function to calculate the actual speed
+int calcSpeed(void){
+    // The x value should be the max cycle you can have so that ....
+    int x = 1;
+    return x/240;
+}
 void main(void)
 {
     int i = 0;
     // Set system frequency to 120 MHz
-    sysClock = SysCtlClockFreqSet(SYSCTL_OSC_INT | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480, 120000000);
-
+    // Ist jetzt in timer.c
     init_and_config_display();
     init_and_config_sensor();
-
+    init_clock();
+    tt_handler();
 
     // Test
     //timerLCD();

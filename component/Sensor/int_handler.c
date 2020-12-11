@@ -16,13 +16,13 @@
 #include <inc/hw_memmap.h>      // GPIO_PORTX_BASE
 
 void IntPortPHandler(void){
-    GPIO_PORTP_ICR_R |= 0x01;               // Clear interrupt register
+    GPIO_PORTP_IM_R &= 0x00;
     if(GPIO_PORTP_DATA_R == 0x03){
-        printf("DATA: %#02x\n", GPIO_PORTP_DATA_R);
+        //printf("DATA: %#02x\n", GPIO_PORTP_DATA_R);
         direction = FORWARD;
     }
     else if(GPIO_PORTP_DATA_R == 0x02){
-        printf("DATA: %#02x\n", GPIO_PORTP_DATA_R);
+        //printf("DATA: %#02x\n", GPIO_PORTP_DATA_R);
         direction = BACKWARD;
     }
 
@@ -57,5 +57,9 @@ void IntPortPHandler(void){
     //GPIO_PORTP_RIS_R &= 0x00;     // Test
     //printf("IEV: %x\n", GPIO_PORTP_IEV_R);
     printf("%i\n", direction);
+    printf("%#x\n", GPIO_PORTP_ICR_R);
+    GPIO_PORTP_ICR_R = 0x02;               // Clear interrupt register (Sorgt dafür, dass keine neue Flnake erkannt wird, wenn der Motor aus ist, aber cleared nicht)
+    printf("%#x\n", GPIO_PORTP_ICR_R);
+    GPIO_PORTP_IM_R |= 0x02;
    // GPIO_PORTP_IM_R |= 0x03;      // Test
 }
