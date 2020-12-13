@@ -17,7 +17,7 @@ void Timer1_DisplayIntHandler(void);
 void wait(int time);
 
 uint32_t sysClock, timerScaler;
-uint32_t geschwindigkeit = 0;
+uint32_t geschwindigkeit = 0 , speed = 0;
 
 void Timer1_DisplayIntHandler(void)
 {
@@ -61,29 +61,26 @@ void wait(int time)
     for (tmp = 0; tmp < 10800 * time; tmp++); // ~ 1ms
 }
 
-void stop_handler(void)
+void Count_IntHandler(void)
 {
     GPIOIntClear(GPIO_PORTP_BASE,GPIO_PIN_0); // finially not needed, but done as a matter of principle
     SysTickDisable(); // stop  systick
 
-    geschwindigkeit++;
-    if (geschwindigkeit >= 240)
-    {
-        geschwindigkeit = 0;
-    }
-    printf("%d\n",geschwindigkeit);
+    speed++;
+
+    printf("%d\n",speed);
 
 }
 
-void test(void)
+void Timerout_Cal_IntHandler(void)
 {
     TimerIntClear(TIMER2_BASE, TIMER_TIMA_TIMEOUT);
-    geschwindigkeit = 0;
+    geschwindigkeit = speed;
+    speed = 0;
 }
 
 void main(void)
 {
-    int i = 0;
     IntMasterDisable();        // as matter of principle
     // Set system frequency to 120 MHz
     sysClock = SysCtlClockFreqSet(SYSCTL_OSC_INT | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480, 120000000);
@@ -126,7 +123,7 @@ void main(void)
     // Rising edge type interrupt
     GPIOIntTypeSet(GPIO_PORTP_BASE, GPIO_PIN_0, GPIO_RISING_EDGE);
     // "register" entry in  a copied IVT
-    GPIOIntRegister(GPIO_PORTP_BASE, stop_handler);
+    GPIOIntRegister(GPIO_PORTP_BASE, Count_IntHandler);
     GPIOIntClear(GPIO_PORTP_BASE, GPIO_PIN_0); // optional ...
     IntPrioritySet(INT_GPIOP0, 0x20); //high prio
     GPIOIntEnable(GPIO_PORTP_BASE, GPIO_PIN_0); // Allow request output from Port unit
@@ -147,7 +144,7 @@ void main(void)
     // Configure Timer2 Interrupt
     TimerConfigure(TIMER2_BASE, TIMER_CFG_PERIODIC);
     TimerLoadSet(TIMER2_BASE, TIMER_A, sysClock / 2);      // fires every 500 ms
-    TimerIntRegister(TIMER2_BASE, TIMER_A, test);
+    TimerIntRegister(TIMER2_BASE, TIMER_A, Timerout_Cal_IntHandler);
     //IntPrioritySet(INT_TIMER2A, 0x80);
 
     IntEnable(INT_TIMER2A);
