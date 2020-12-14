@@ -2,6 +2,8 @@
 #include <component/LCD/lcd_paint.h>
 #include <component/Sensor/int_handler.h>
 #include <component/Sensor/sensor.h>
+#include <component/Sensor/Timer/timer.h>
+#include <component/LCD/display_init.h>
 #include <stdio.h>
 #include <math.h>
 
@@ -17,7 +19,7 @@ void Timer1_DisplayIntHandler(void);
 void wait(int time);
 
 uint32_t sysClock, timerScaler;
-uint32_t geschwindigkeit = 0 , speed = 0;
+uint32_t geschwindigkeit = 0;
 
 void Timer1_DisplayIntHandler(void)
 {
@@ -88,6 +90,9 @@ void main(void)
     SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1);    // Clock Gate enable TIMER1
     SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER2);    // Clock Gate enable TIMER2
     SysCtlDelay(10);
+
+    speed = 0;
+    counter = 0;
 
     init_and_config_display();
     init_and_config_sensor();

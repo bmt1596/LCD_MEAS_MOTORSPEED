@@ -9,6 +9,9 @@
 #include <stdbool.h>            // type bool for giop.h
 #include <driverlib/systick.h>   // For SysTick Enable
 #include <driverlib/sysctl.h>   // For SysFreq
+#include <driverlib/timer.h>
+#include <driverlib/interrupt.h>
+#include <driverlib/gpio.h>
 #include "inc/hw_types.h"
 #include "inc/tm4c1294ncpdt.h"
 #include <stdio.h>              // Debug only
@@ -18,11 +21,13 @@
 #ifndef COMPONENT_TIMER_TIMER_H_
 #define COMPONENT_TIMER_TIMER_H_
 
-volatile unsigned char globalCount = 0;
+volatile unsigned char global_count;
+volatile int counter;
 
 void init_clock(void);
 void tt_handler(void);
 void timerLCD(void);
-void egdeCountTimer(void);
+void egde_count_timer(void);
+void edge_counter_interrupt(void);
 
 #endif /* COMPONENT_TIMER_TIMER_H_ */

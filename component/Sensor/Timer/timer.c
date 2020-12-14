@@ -21,8 +21,33 @@ void init_clock(void){
     SysTickIntEnable();
     printf("%i\n", sysClock);
 }
-void tt_handler(void){
 
+void init_egde_count_timer(void){
+    GPIOPinTypeGPIOInput(GPIO_PORTA_BASE, GPIO_PIN_0);
+    //GPIOPinConfigure(GPIO_PA0_CAN0RX);
+    GPIOPinTypeTimer(GPIO_PORTA_BASE,GPIO_PIN_0);
+
+}
+
+void edge_count_timer(void){
+    TimerDisable(TIMER0_BASE, TIMER_A);
+    TimerConfigure(TIMER0_BASE, TIMER_CFG_A_PERIODIC_UP);
+    TimerControlEvent(TIMER0_BASE, TIMER_A, TIMER_EVENT_POS_EDGE);
+    TimerLoadSet(TIMER0_BASE, TIMER_A, 0);
+    TimerMatchSet(TIMER0_BASE, TIMER_A, 1);
+    IntRegister(INT_TIMER0A, edge_counter_interrupt);
+    TimerEnable(TIMER0_BASE, TIMER_A);
+}
+void tt_handler(void){
+    if (counter == 2){
+        //
+        counter = 0;
+    }
+    counter++;
+}
+
+void edge_counter_interrupt(void){
+    global_count++;
 }
 
 void timerLCD(void){
