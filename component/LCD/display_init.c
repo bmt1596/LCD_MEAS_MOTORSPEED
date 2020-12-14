@@ -49,20 +49,3 @@ void display_number_and_line(void)
     x_old = x; y_old = y;
 }
 
-void display_test(void){
-    // Test function to display the number and red line
-    int i = 0;
-        for (i = 0; i <= 240; i++)
-        {
-            speed = i;
-            wait(10);
-            display_number_and_line();
-        }
-
-        for (i = 240; i >= 0; i--)
-        {
-            speed = i;
-            wait(2);
-            display_number_and_line();
-        }
-}

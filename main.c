@@ -22,7 +22,7 @@ void wait(int time);
 uint32_t sysClock, timerScaler;
 uint32_t geschwindigkeit = 0;
 
-/*void Timer1_DisplayIntHandler(void)
+void Timer1_DisplayIntHandler(void)
 {
     static uint16_t radius = 160;
     static uint16_t phinull = 150;
@@ -56,7 +56,7 @@ uint32_t geschwindigkeit = 0;
     print_string1216("Km/h", 135, 253, COLOR_WHITE, COLOR_BLACK);
 
     x_old = x; y_old = y;
-}*/
+}
 
 void wait(int time)
 {
@@ -68,11 +68,7 @@ void Count_IntHandler(void)
 {
     GPIOIntClear(GPIO_PORTP_BASE,GPIO_PIN_0); // finially not needed, but done as a matter of principle
     SysTickDisable(); // stop  systick
-
     speed++;
-
-    printf("%d\n",speed);
-
 }
 
 void Timerout_Cal_IntHandler(void)
@@ -82,46 +78,12 @@ void Timerout_Cal_IntHandler(void)
     speed = 0;
 }
 
-void main(void)
-{
-    IntMasterDisable();        // as matter of principle
-    // Set system frequency to 120 MHz
-    sysClock = SysCtlClockFreqSet(SYSCTL_OSC_INT | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480, 120000000);
+void init_peripherals (void) {
+
     SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER0);    // Clock Gate enable TIMER0
     SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1);    // Clock Gate enable TIMER1
     SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER2);    // Clock Gate enable TIMER2
     SysCtlDelay(10);
-
-    speed = 0;
-    counter = 0;
-
-    init_and_config_display();
-    init_and_config_sensor();
-    // dis play complett number 0-240 and circle
-    display_layout();
-    display_number_and_line();
-    //Timer1_DisplayIntHandler();
-
-    // Test
-    //timerLCD();
-    // Test Ende
-
-    /*
-    for (i = 0; i <= 240; i++)
-    {
-        geschwindigkeit = i;
-        //wait(10);
-        Timer1_DisplayIntHandler();
-    }
-
-    for (i = 240; i >= 0; i--)
-    {
-        geschwindigkeit = i;
-        //wait(2);
-        Timer1_DisplayIntHandler();
-    }
-    */
-
 
     //periphery clock enable
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOP);
@@ -143,8 +105,8 @@ void main(void)
     // Configure Timer1 Interrupt
     TimerConfigure(TIMER1_BASE, TIMER_CFG_PERIODIC);
     TimerLoadSet(TIMER1_BASE, TIMER_A, sysClock / 20);      // fires every 50 ms
-    TimerIntRegister(TIMER1_BASE, TIMER_A, display_number_and_line);        // Neu
-    //TimerIntRegister(TIMER1_BASE, TIMER_A, Timer1_DisplayIntHandler);
+    //TimerIntRegister(TIMER1_BASE, TIMER_A, display_number_and_line);        // Neu
+    TimerIntRegister(TIMER1_BASE, TIMER_A, Timer1_DisplayIntHandler);
     IntEnable(INT_TIMER1A);
     TimerIntEnable(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
     TimerEnable(TIMER1_BASE, TIMER_A);
@@ -158,12 +120,22 @@ void main(void)
     IntEnable(INT_TIMER2A);
     TimerIntEnable(TIMER2_BASE, TIMER_TIMA_TIMEOUT);
     TimerEnable(TIMER2_BASE, TIMER_A);
+}
+
+void main(void)
+{
+    IntMasterDisable();        // as matter of principle
+    // Set system frequency to 120 MHz
+    sysClock = SysCtlClockFreqSet(SYSCTL_OSC_INT | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480, 120000000);
+    init_peripherals();
+    init_and_config_display();
+    display_layout();
+    init_and_config_sensor();
+
 
     IntMasterEnable();
     while (1)
        {
-        //Test Motor and Display
-        //printf("Write rectangles\n"); // for debug only
         // GPIO_PORTN_DATA_R = GPIO_PORTP_DATA_R & 0x03;
 
        }
