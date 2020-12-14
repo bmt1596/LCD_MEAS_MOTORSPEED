@@ -16,6 +16,7 @@
 //void display_layout(void);
 //void display_project_information(void);
 //void Timer1_DisplayIntHandler(void);
+// test comment
 void wait(int time);
 
 uint32_t sysClock, timerScaler;
