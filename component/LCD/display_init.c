@@ -21,6 +21,7 @@ void display_number_and_line(void)
     static uint16_t x, y;
     static uint16_t x_old = X_CENTER, y_old = Y_CENTER;
 
+    TimerIntClear(TIMER1_BASE, TIMER_TIMA_TIMEOUT); // Neu
     char buffer[20];
     sprintf(buffer, "%3d km/h", speed);
     print_string1216(buffer, 400, 245, COLOR_BLACK, COLOR_YELLO);

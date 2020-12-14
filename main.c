@@ -15,13 +15,13 @@
 
 //void display_layout(void);
 //void display_project_information(void);
-void Timer1_DisplayIntHandler(void);
+//void Timer1_DisplayIntHandler(void);
 void wait(int time);
 
 uint32_t sysClock, timerScaler;
 uint32_t geschwindigkeit = 0;
 
-void Timer1_DisplayIntHandler(void)
+/*void Timer1_DisplayIntHandler(void)
 {
     static uint16_t radius = 160;
     static uint16_t phinull = 150;
@@ -55,7 +55,7 @@ void Timer1_DisplayIntHandler(void)
     print_string1216("Km/h", 135, 253, COLOR_WHITE, COLOR_BLACK);
 
     x_old = x; y_old = y;
-}
+}*/
 
 void wait(int time)
 {
@@ -98,7 +98,8 @@ void main(void)
     init_and_config_sensor();
     // dis play complett number 0-240 and circle
     display_layout();
-    Timer1_DisplayIntHandler();
+    display_number_and_line();
+    //Timer1_DisplayIntHandler();
 
     // Test
     //timerLCD();
@@ -141,7 +142,8 @@ void main(void)
     // Configure Timer1 Interrupt
     TimerConfigure(TIMER1_BASE, TIMER_CFG_PERIODIC);
     TimerLoadSet(TIMER1_BASE, TIMER_A, sysClock / 20);      // fires every 50 ms
-    TimerIntRegister(TIMER1_BASE, TIMER_A, Timer1_DisplayIntHandler);
+    TimerIntRegister(TIMER1_BASE, TIMER_A, display_number_and_line);        // Neu
+    //TimerIntRegister(TIMER1_BASE, TIMER_A, Timer1_DisplayIntHandler);
     IntEnable(INT_TIMER1A);
     TimerIntEnable(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
     TimerEnable(TIMER1_BASE, TIMER_A);

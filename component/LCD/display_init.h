@@ -7,6 +7,7 @@
 
 #include <component/LCD/lcd_config.h>
 #include <component/LCD/lcd_paint.h>
+#include "driverlib/timer.h"
 //#include <component/Calculation/calculation.h>
 //#include <component/Sensor/Timer/timer.h>
 #include <stdio.h>
