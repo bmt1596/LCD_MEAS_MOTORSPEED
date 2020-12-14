@@ -83,6 +83,7 @@ void Count_IntHandler(void)
     GPIOIntClear(GPIO_PORTP_BASE,GPIO_PIN_0); // finially not needed, but done as a matter of principle
     SysTickDisable(); // stop  systick
     ge++;
+    GPIO_PORTN_DATA_R = GPIO_PORTP_DATA_R & 0x03;
 
     if (GPIO_PORTP_DATA_R == 0x03)
     {
@@ -104,7 +105,7 @@ void Timerout_Cal_IntHandler(void)
     geschwindigkeit = ge;
     ge = 0;
     richtung = 0;
-    print_string1216("(N)", 215, 700, COLOR_BLACK, COLOR_YELLO);
+    print_string1216("( )", 215, 700, COLOR_BLACK, COLOR_YELLO);
 }
 
 void init_peripherals (void) {
@@ -157,9 +158,6 @@ void main(void)
     init_and_config_sensor();
 
     IntMasterEnable();
-    while (1)
-       {
-        // GPIO_PORTN_DATA_R = GPIO_PORTP_DATA_R & 0x03;
-       }
+    while (1);
 }
 
