@@ -57,6 +57,7 @@ uint32_t geschwindigkeit = 0;
     x_old = x; y_old = y;
 }*/
 
+// Test
 void wait(int time)
 {
     volatile int tmp;
