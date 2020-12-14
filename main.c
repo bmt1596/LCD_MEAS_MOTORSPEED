@@ -20,7 +20,8 @@
 void wait(int time);
 
 uint32_t sysClock, timerScaler;
-uint32_t geschwindigkeit = 0;
+double geschwindigkeit = 0;
+double ge = 0;
 
 void Timer1_DisplayIntHandler(void)
 {
@@ -32,7 +33,7 @@ void Timer1_DisplayIntHandler(void)
 
     TimerIntClear(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
     char buffer[20];
-    sprintf(buffer, "%3d km/h", geschwindigkeit);
+    sprintf(buffer, "%3.2lf km/h", geschwindigkeit);
     print_string1216(buffer, 400, 245, COLOR_BLACK, COLOR_YELLO);
 
     phi = geschwindigkeit + phinull;
@@ -68,14 +69,14 @@ void Count_IntHandler(void)
 {
     GPIOIntClear(GPIO_PORTP_BASE,GPIO_PIN_0); // finially not needed, but done as a matter of principle
     SysTickDisable(); // stop  systick
-    speed++;
+    ge++;
 }
 
 void Timerout_Cal_IntHandler(void)
 {
     TimerIntClear(TIMER2_BASE, TIMER_TIMA_TIMEOUT);
-    geschwindigkeit = speed;
-    speed = 0;
+    geschwindigkeit = ge;
+    ge = 0;
 }
 
 void init_peripherals (void) {
@@ -85,18 +86,14 @@ void init_peripherals (void) {
     SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER2);    // Clock Gate enable TIMER2
     SysCtlDelay(10);
 
-    //periphery clock enable
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOP);
-    //pin setup
-    GPIOPinTypeGPIOInput(GPIO_PORTP_BASE, GPIO_PIN_0);
-    // Rising edge type interrupt
-    GPIOIntTypeSet(GPIO_PORTP_BASE, GPIO_PIN_0, GPIO_RISING_EDGE);
-    // "register" entry in  a copied IVT
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOP);                        //periphery clock enable
+    GPIOPinTypeGPIOInput(GPIO_PORTP_BASE, GPIO_PIN_0);                  //pin setup
+    GPIOIntTypeSet(GPIO_PORTP_BASE, GPIO_PIN_0, GPIO_RISING_EDGE);      // Rising edge type interrupt
     GPIOIntRegister(GPIO_PORTP_BASE, Count_IntHandler);
-    GPIOIntClear(GPIO_PORTP_BASE, GPIO_PIN_0); // optional ...
-    IntPrioritySet(INT_GPIOP0, 0x20); //high prio
-    GPIOIntEnable(GPIO_PORTP_BASE, GPIO_PIN_0); // Allow request output from Port unit
-    IntEnable(INT_GPIOP0);  // Allow request input to NVIC
+    GPIOIntClear(GPIO_PORTP_BASE, GPIO_PIN_0);                          // optional ...
+    IntPrioritySet(INT_GPIOP0, 0x20);                                   // high prio
+    GPIOIntEnable(GPIO_PORTP_BASE, GPIO_PIN_0);                         // Allow request output from Port unit
+    IntEnable(INT_GPIOP0);                                              // Allow request input to NVIC
 
     // Configure Timer0 Interrupt
     TimerConfigure(TIMER0_BASE, TIMER_CFG_PERIODIC_UP);
@@ -105,7 +102,6 @@ void init_peripherals (void) {
     // Configure Timer1 Interrupt
     TimerConfigure(TIMER1_BASE, TIMER_CFG_PERIODIC);
     TimerLoadSet(TIMER1_BASE, TIMER_A, sysClock / 20);      // fires every 50 ms
-    //TimerIntRegister(TIMER1_BASE, TIMER_A, display_number_and_line);        // Neu
     TimerIntRegister(TIMER1_BASE, TIMER_A, Timer1_DisplayIntHandler);
     IntEnable(INT_TIMER1A);
     TimerIntEnable(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
@@ -132,12 +128,10 @@ void main(void)
     display_layout();
     init_and_config_sensor();
 
-
     IntMasterEnable();
     while (1)
        {
         // GPIO_PORTN_DATA_R = GPIO_PORTP_DATA_R & 0x03;
-
        }
 }
 
