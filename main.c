@@ -102,7 +102,7 @@ void Count_IntHandler(void)
 void Timerout_Cal_IntHandler(void)
 {
     TimerIntClear(TIMER2_BASE, TIMER_TIMA_TIMEOUT);
-    geschwindigkeit = ge;
+    geschwindigkeit = ge*2.71;
     ge = 0;
     richtung = 0;
     print_string1216("( )", 215, 700, COLOR_BLACK, COLOR_YELLO);
@@ -138,7 +138,7 @@ void init_peripherals (void) {
 
     // Configure Timer2 Interrupt
     TimerConfigure(TIMER2_BASE, TIMER_CFG_PERIODIC);
-    TimerLoadSet(TIMER2_BASE, TIMER_A, sysClock / 2);      // fires every 500 ms
+    TimerLoadSet(TIMER2_BASE, TIMER_A, sysClock / 5);      // fires every 200 ms
     TimerIntRegister(TIMER2_BASE, TIMER_A, Timerout_Cal_IntHandler);
     //IntPrioritySet(INT_TIMER2A, 0x80);
 
