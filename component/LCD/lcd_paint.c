@@ -66,6 +66,7 @@ void display_layout(void)
     // display under black line
     drawline_H(0, 550, 470, COLOR_BLACK, 10);
     drawline_H(154, 395, 470, COLOR_BLACK, 3);
+
 }
 
 
@@ -89,6 +90,13 @@ void display_project_information(void)
                     105, 565, COLOR_WHITE, COLOR_BLACK);
     print_string1216("2. Hauke Kosmiter",
                         125, 565, COLOR_WHITE, COLOR_BLACK);
+
+    print_string1216("Fahzeug",
+                            180, 630, COLOR_WHITE, COLOR_BLACK);
+
+    print_string1216("- Richtung",
+                            215, 565, COLOR_WHITE, COLOR_BLACK);
+
 }
 
 

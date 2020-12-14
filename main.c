@@ -22,6 +22,7 @@ void wait(int time);
 uint32_t sysClock, timerScaler;
 double geschwindigkeit = 0;
 double ge = 0;
+int richtung = 0;
 
 void Timer1_DisplayIntHandler(void)
 {
@@ -32,9 +33,21 @@ void Timer1_DisplayIntHandler(void)
     static uint16_t x_old = X_CENTER, y_old = Y_CENTER;
 
     TimerIntClear(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
+    if (richtung == 0)
+    {
+    }
+    else if (richtung == 1)
+    {
+        print_string1216("(V)", 215, 700, COLOR_BLACK, COLOR_YELLO);
+    }
+    else if (richtung == 2)
+    {
+        print_string1216("(R)", 215, 700, COLOR_BLACK, COLOR_YELLO);
+    }
+
     char buffer[20];
     sprintf(buffer, "%3.2lf km/h", geschwindigkeit);
-    print_string1216(buffer, 400, 245, COLOR_BLACK, COLOR_YELLO);
+    print_string1216(buffer, 400, 225, COLOR_BLACK, COLOR_YELLO);
 
     phi = geschwindigkeit + phinull;
     x = X_CENTER + round(radius* cos((double)(phi)*2*PI/360));
@@ -70,6 +83,19 @@ void Count_IntHandler(void)
     GPIOIntClear(GPIO_PORTP_BASE,GPIO_PIN_0); // finially not needed, but done as a matter of principle
     SysTickDisable(); // stop  systick
     ge++;
+
+    if (GPIO_PORTP_DATA_R == 0x03)
+    {
+        richtung = 1;
+    }
+    else if (GPIO_PORTP_DATA_R == 0x02)
+    {
+        richtung = 2;
+    }
+    else if (GPIO_PORTP_DATA_R == 0x00)
+    {
+        richtung = 0;
+    }
 }
 
 void Timerout_Cal_IntHandler(void)
@@ -77,6 +103,8 @@ void Timerout_Cal_IntHandler(void)
     TimerIntClear(TIMER2_BASE, TIMER_TIMA_TIMEOUT);
     geschwindigkeit = ge;
     ge = 0;
+    richtung = 0;
+    print_string1216("(N)", 215, 700, COLOR_BLACK, COLOR_YELLO);
 }
 
 void init_peripherals (void) {
