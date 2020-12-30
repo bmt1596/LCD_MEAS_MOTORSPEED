@@ -2,7 +2,6 @@
 #include <component/LCD/lcd_paint.h>
 #include <component/Sensor/sensor.h>
 #include <component/Sensor/Timer/timer.h>
-#include <component/LCD/display_init.h>
 #include <stdio.h>
 #include <math.h>
 
@@ -12,15 +11,9 @@
 #include "driverlib/gpio.h"      //  Tivaware functions: GPIO... + Macros  GPIO_...
 #include "driverlib/timer.h"
 
-//void display_layout(void);
-//void display_project_information(void);
-//void Timer1_DisplayIntHandler(void);
-// test comment
-void wait(int time);
-
 uint32_t sysClock, timerScaler;
-double geschwindigkeit = 0;
-double ge = 0;
+static double speed = 0;
+static double count_impuls = 0;
 int richtung = 0;
 
 void Timer1_DisplayIntHandler(void)
@@ -33,8 +26,7 @@ void Timer1_DisplayIntHandler(void)
 
     TimerIntClear(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
     // printf("%lf\n",ge);
-    geschwindigkeit = ge;
-
+    speed = count_impuls;
     if (richtung == 0)
     {
 
@@ -49,10 +41,10 @@ void Timer1_DisplayIntHandler(void)
     }
 
     char buffer[20];
-    sprintf(buffer, "%3.2lf km/h", geschwindigkeit);
+    sprintf(buffer, "%3.2lf km/h", speed);
     print_string1216(buffer, 400, 225, COLOR_BLACK, COLOR_YELLO);
 
-    phi = geschwindigkeit + phinull;
+    phi = speed + phinull;
     x = X_CENTER + round(radius* cos((double)(phi)*2*PI/360));
     y = Y_CENTER + round(radius* sin((double)(phi)*2*PI/360));
 
@@ -73,14 +65,13 @@ void Timer1_DisplayIntHandler(void)
     print_string1216("Km/h", 135, 253, COLOR_WHITE, COLOR_BLACK);
 
     x_old = x; y_old = y;
-    ge = 0;
+    count_impuls = 0;
 }
 
 void Count_IntHandler(void)
 {
     GPIOIntClear(GPIO_PORTP_BASE,GPIO_PIN_0); // finially not needed, but done as a matter of principle
-    SysTickDisable(); // stop  systick
-    ge++;
+    count_impuls++;
     GPIO_PORTN_DATA_R = GPIO_PORTP_DATA_R & 0x03;
 
     if (GPIO_PORTP_DATA_R == 0x03)
@@ -104,9 +95,9 @@ void init_peripherals (void) {
 
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOP);
     //pin setup
-    GPIOPinTypeGPIOInput(GPIO_PORTP_BASE, GPIO_PIN_0);
+    GPIOPinTypeGPIOInput(GPIO_PORTP_BASE, GPIO_PIN_0|GPIO_INT_PIN_1);
     // Rising edge type interrupt
-    GPIOIntTypeSet(GPIO_PORTP_BASE, GPIO_PIN_0,GPIO_RISING_EDGE);
+    GPIOIntTypeSet(GPIO_PORTP_BASE, GPIO_PIN_0,GPIO_RISING_EDGE|GPIO_DISCRETE_INT);
     // "register" entry in  a copied IVT
     GPIOIntRegister(GPIO_PORTP_BASE, Count_IntHandler);
     GPIOIntClear(GPIO_PORTP_BASE, GPIO_PIN_0); // optional ...
