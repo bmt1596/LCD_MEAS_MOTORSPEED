@@ -1,6 +1,5 @@
 #include <component/LCD/lcd_config.h>
 #include <component/LCD/lcd_paint.h>
-#include <component/Sensor/int_handler.h>
 #include <component/Sensor/sensor.h>
 #include <component/Sensor/Timer/timer.h>
 #include <component/LCD/display_init.h>
@@ -33,8 +32,12 @@ void Timer1_DisplayIntHandler(void)
     static uint16_t x_old = X_CENTER, y_old = Y_CENTER;
 
     TimerIntClear(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
+    // printf("%lf\n",ge);
+    geschwindigkeit = ge;
+
     if (richtung == 0)
     {
+
     }
     else if (richtung == 1)
     {
@@ -70,12 +73,7 @@ void Timer1_DisplayIntHandler(void)
     print_string1216("Km/h", 135, 253, COLOR_WHITE, COLOR_BLACK);
 
     x_old = x; y_old = y;
-}
-
-void wait(int time)
-{
-    volatile int tmp;
-    for (tmp = 0; tmp < 10800 * time; tmp++); // ~ 1ms
+    ge = 0;
 }
 
 void Count_IntHandler(void)
@@ -99,56 +97,30 @@ void Count_IntHandler(void)
     }
 }
 
-void Timerout_Cal_IntHandler(void)
-{
-    TimerIntClear(TIMER2_BASE, TIMER_TIMA_TIMEOUT);
-    geschwindigkeit = ge * 2.71;
-    ge = 0;
-    richtung = 0;
-    print_string1216("( )", 215, 700, COLOR_BLACK, COLOR_YELLO);
-    if (geschwindigkeit > 240)
-    {
-        geschwindigkeit = 240;
-    }
-}
-
 void init_peripherals (void) {
 
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER0);    // Clock Gate enable TIMER0
     SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1);    // Clock Gate enable TIMER1
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER2);    // Clock Gate enable TIMER2
     SysCtlDelay(10);
 
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOP);                        //periphery clock enable
-    GPIOPinTypeGPIOInput(GPIO_PORTP_BASE, GPIO_PIN_0);                  //pin setup
-    GPIOIntTypeSet(GPIO_PORTP_BASE, GPIO_PIN_0, GPIO_RISING_EDGE);      // Rising edge type interrupt
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOP);
+    //pin setup
+    GPIOPinTypeGPIOInput(GPIO_PORTP_BASE, GPIO_PIN_0);
+    // Rising edge type interrupt
+    GPIOIntTypeSet(GPIO_PORTP_BASE, GPIO_PIN_0,GPIO_RISING_EDGE);
+    // "register" entry in  a copied IVT
     GPIOIntRegister(GPIO_PORTP_BASE, Count_IntHandler);
-    GPIOIntClear(GPIO_PORTP_BASE, GPIO_PIN_0);                          // optional ...
-    IntPrioritySet(INT_GPIOP0, 0x20);                                   // high prio
-    GPIOIntEnable(GPIO_PORTP_BASE, GPIO_PIN_0);                         // Allow request output from Port unit
-    IntEnable(INT_GPIOP0);                                              // Allow request input to NVIC
-
-    // Configure Timer0 Interrupt
-    TimerConfigure(TIMER0_BASE, TIMER_CFG_PERIODIC_UP);
-    TimerEnable(TIMER0_BASE, TIMER_A);
+    GPIOIntClear(GPIO_PORTP_BASE, GPIO_PIN_0); // optional ...
+    IntPrioritySet(INT_GPIOP0, 0x20); //high prio
+    GPIOIntEnable(GPIO_PORTP_BASE, GPIO_PIN_0); // Allow request output from Port unit
+    IntEnable(INT_GPIOP0);  // Allow request input to NVIC
 
     // Configure Timer1 Interrupt
     TimerConfigure(TIMER1_BASE, TIMER_CFG_PERIODIC);
-    TimerLoadSet(TIMER1_BASE, TIMER_A, sysClock / 10);      // fires every 50 ms
+    TimerLoadSet(TIMER1_BASE, TIMER_A, sysClock / 5);      // fires every 200 ms
     TimerIntRegister(TIMER1_BASE, TIMER_A, Timer1_DisplayIntHandler);
     IntEnable(INT_TIMER1A);
     TimerIntEnable(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
     TimerEnable(TIMER1_BASE, TIMER_A);
-
-    // Configure Timer2 Interrupt
-    TimerConfigure(TIMER2_BASE, TIMER_CFG_PERIODIC);
-    TimerLoadSet(TIMER2_BASE, TIMER_A, sysClock / 5);      // fires every 200 ms
-    TimerIntRegister(TIMER2_BASE, TIMER_A, Timerout_Cal_IntHandler);
-    //IntPrioritySet(INT_TIMER2A, 0x20);
-
-    IntEnable(INT_TIMER2A);
-    TimerIntEnable(TIMER2_BASE, TIMER_TIMA_TIMEOUT);
-    TimerEnable(TIMER2_BASE, TIMER_A);
 }
 
 void main(void)
@@ -160,7 +132,6 @@ void main(void)
     init_and_config_display();
     display_layout();
     init_and_config_sensor();
-
     IntMasterEnable();
     while (1);
 }

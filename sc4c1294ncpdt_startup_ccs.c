@@ -22,7 +22,6 @@
 //
 //*****************************************************************************
 
-#include <component/Sensor/int_handler.h>
 #include <stdint.h>
 
 //*****************************************************************************
@@ -56,7 +55,6 @@ extern uint32_t __STACK_TOP;
 //
 //*****************************************************************************
 // To be added by user
-extern void IntPortPHandler(void);       //Own interrupt handler
 
 //*****************************************************************************
 //
@@ -153,16 +151,16 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // Timer 5 subtimer A
     IntDefaultHandler,                      // Timer 5 subtimer B
     IntDefaultHandler,                      // FPU
-    IntDefaultHandler,                      // PECI 0
-    IntDefaultHandler,                      // LPC 0
+    0,                                      // Reserved
+    0,                                      // Reserved
     IntDefaultHandler,                      // I2C4 Master and Slave
     IntDefaultHandler,                      // I2C5 Master and Slave
     IntDefaultHandler,                      // GPIO Port M
     IntDefaultHandler,                      // GPIO Port N
-    IntDefaultHandler,                      // Fan 0
+    0,                                      // Reserved
     IntDefaultHandler,                      // Tamper
     IntDefaultHandler,                      // GPIO Port P (Summary or P0)
-    IntPortPHandler,                      // GPIO Port P1
+    IntDefaultHandler,                      // GPIO Port P1
     IntDefaultHandler,                      // GPIO Port P2
     IntDefaultHandler,                      // GPIO Port P3
     IntDefaultHandler,                      // GPIO Port P4
@@ -218,8 +216,8 @@ ResetISR(void)
     // Jump to the CCS C initialization routine.  This will enable the
     // floating-point unit as well, so that does not need to be done here.
     //
-    __asm("    .global _c_int00\n"
-          "    b.w     _c_int00");
+   // __asm("    .global _c_int00\n"  //geändert Pro
+   //       "    b.w     _c_int00");
 }
 
 //*****************************************************************************
