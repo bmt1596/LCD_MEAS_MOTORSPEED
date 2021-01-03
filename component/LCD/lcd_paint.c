@@ -96,6 +96,13 @@ void display_project_information(void)
 
     print_string1216("- Richtung",
                             215, 565, COLOR_WHITE, COLOR_BLACK);
+    print_string1216("- Kilometerstand:",
+                                245, 565, COLOR_WHITE, COLOR_BLACK);
+    print_string1216("  in m:",
+                                    270, 565, COLOR_WHITE, COLOR_BLACK);
+    print_string1216("  in km:",
+                                        295, 565, COLOR_WHITE, COLOR_BLACK);
+
 
 }
 

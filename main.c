@@ -12,8 +12,11 @@
 
 uint32_t sysClock, timerScaler;
 static double speed = 0;
-static double count_impuls = 0;
+static int count_impuls = 0;
+static double strecke_in_m = 0;
+static double strecke_in_km = 0;
 int richtung = 0;
+
 
 void Timer1_DisplayIntHandler(void)
 {
@@ -22,13 +25,24 @@ void Timer1_DisplayIntHandler(void)
     static uint16_t phi;
     static uint16_t x, y;
     static uint16_t x_old = X_CENTER, y_old = Y_CENTER;
+    char buffer1[20], buffer2[20], buffer3[20];
 
     TimerIntClear(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
-    // printf("%lf\n",ge);
+
+
     speed = count_impuls;
-    char buffer[20];
-    sprintf(buffer, "%3.2lf km/h", speed);
-    print_string1216(buffer, 400, 225, COLOR_BLACK, COLOR_YELLO);
+    strecke_in_m = strecke_in_m + (double)(speed/18);
+    strecke_in_km = (double)(strecke_in_m/1000);
+
+    sprintf(buffer1, "%3.2lf km/h", speed);
+    print_string1216(buffer1, 400, 225, COLOR_BLACK, COLOR_YELLO);
+
+    sprintf(buffer2, "%3.2lf", strecke_in_m);
+    print_string1216(buffer2, 270, 700, COLOR_BLACK, COLOR_YELLO);
+
+    sprintf(buffer3, "%3.2lf", strecke_in_km);
+        print_string1216(buffer3, 295, 700, COLOR_BLACK, COLOR_YELLO);
+
 
     phi = speed + phinull;
     x = X_CENTER + round(radius* cos((double)(phi)*2*PI/360));
@@ -73,6 +87,7 @@ void Count_IntHandler(void)
     count_impuls++;
     GPIO_PORTN_DATA_R = GPIO_PORTP_DATA_R & 0x03;
 
+    printf("%d\n",count_impuls);
     if (GPIO_PORTP_DATA_R == 0x03)
     {
         richtung = 1;
@@ -117,7 +132,7 @@ void main(void)
 {
     IntMasterDisable();        // as matter of principle
     // Set system frequency to 120 MHz
-    sysClock = SysCtlClockFreqSet(SYSCTL_OSC_INT | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480, 120000000);
+    sysClock = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), 120000000);
     init_peripherals();
     init_and_config_display();
     display_layout();
