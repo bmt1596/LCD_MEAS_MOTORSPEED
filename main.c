@@ -1,7 +1,6 @@
 #include <component/LCD/lcd_config.h>
 #include <component/LCD/lcd_paint.h>
 #include <component/Sensor/sensor.h>
-#include <component/Sensor/Timer/timer.h>
 #include <stdio.h>
 #include <math.h>
 
@@ -27,19 +26,6 @@ void Timer1_DisplayIntHandler(void)
     TimerIntClear(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
     // printf("%lf\n",ge);
     speed = count_impuls;
-    if (richtung == 0)
-    {
-
-    }
-    else if (richtung == 1)
-    {
-        print_string1216("(V)", 215, 700, COLOR_BLACK, COLOR_YELLO);
-    }
-    else if (richtung == 2)
-    {
-        print_string1216("(R)", 215, 700, COLOR_BLACK, COLOR_YELLO);
-    }
-
     char buffer[20];
     sprintf(buffer, "%3.2lf km/h", speed);
     print_string1216(buffer, 400, 225, COLOR_BLACK, COLOR_YELLO);
@@ -65,6 +51,19 @@ void Timer1_DisplayIntHandler(void)
     print_string1216("Km/h", 135, 253, COLOR_WHITE, COLOR_BLACK);
 
     x_old = x; y_old = y;
+    if (count_impuls == 0)
+    {
+        print_string1216("( )", 215, 700, COLOR_BLACK, COLOR_YELLO);
+    }
+    if (richtung == 1)
+    {
+        print_string1216("(V)", 215, 700, COLOR_BLACK, COLOR_YELLO);
+    }
+    else if (richtung == 2)
+    {
+        print_string1216("(R)", 215, 700, COLOR_BLACK, COLOR_YELLO);
+    }
+
     count_impuls = 0;
 }
 
@@ -90,7 +89,7 @@ void Count_IntHandler(void)
 
 void init_peripherals (void) {
 
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1);    // Clock Gate enable TIMER1
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1);       // Clock Gate enable TIMER1
     SysCtlDelay(10);
 
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOP);
@@ -100,10 +99,10 @@ void init_peripherals (void) {
     GPIOIntTypeSet(GPIO_PORTP_BASE, GPIO_PIN_0,GPIO_RISING_EDGE|GPIO_DISCRETE_INT);
     // "register" entry in  a copied IVT
     GPIOIntRegister(GPIO_PORTP_BASE, Count_IntHandler);
-    GPIOIntClear(GPIO_PORTP_BASE, GPIO_PIN_0); // optional ...
-    IntPrioritySet(INT_GPIOP0, 0x20); //high prio
-    GPIOIntEnable(GPIO_PORTP_BASE, GPIO_PIN_0); // Allow request output from Port unit
-    IntEnable(INT_GPIOP0);  // Allow request input to NVIC
+    GPIOIntClear(GPIO_PORTP_BASE, GPIO_PIN_0);          // optional ...
+    //IntPrioritySet(INT_GPIOP0, 0x20);                   //high prio
+    GPIOIntEnable(GPIO_PORTP_BASE, GPIO_PIN_0);         // Allow request output from Port unit
+    IntEnable(INT_GPIOP0);                              // Allow request input to NVIC
 
     // Configure Timer1 Interrupt
     TimerConfigure(TIMER1_BASE, TIMER_CFG_PERIODIC);
