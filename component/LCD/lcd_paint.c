@@ -51,11 +51,15 @@ void display_layout(void)
     // display gold circle
     drawCircle_px(X_CENTER, Y_CENTER, 222, COLOR_YELLO, 3);
 
+    // outside red circle
+     drawCircle_px(X_CENTER, Y_CENTER, 245, COLOR_RED, 1);
+
     // unter black line
     drawline_H(0, 550, 390, COLOR_BLACK, 100);
 
     // outside white circle
     drawCircle_px(X_CENTER, Y_CENTER, 235, COLOR_WHITE, 4);
+
 
     // display center point
     drawCircle_px(X_CENTER, Y_CENTER, 6, COLOR_WHITE, 4);
@@ -65,7 +69,8 @@ void display_layout(void)
 
     // display under black line
     drawline_H(0, 550, 470, COLOR_BLACK, 10);
-    drawline_H(154, 395, 470, COLOR_BLACK, 3);
+    drawline_H(154, 395, 470, COLOR_WHITE, 3);
+
 
 }
 
@@ -73,6 +78,7 @@ void display_layout(void)
 void display_project_information(void)
 {
     set_background_color(COLOR_BLACK);
+
     drawline_H(551, 800, 170, COLOR_WHITE, 2);
     drawline_V(0, 480, 550, COLOR_WHITE, 2);
     // for unter line
@@ -91,17 +97,29 @@ void display_project_information(void)
     print_string1216("2. Hauke Kosmiter",
                         125, 565, COLOR_WHITE, COLOR_BLACK);
 
-    print_string1216("Fahzeug",
-                            180, 630, COLOR_WHITE, COLOR_BLACK);
+    print_string1216("Fahzeug", 180, 630, COLOR_WHITE, COLOR_BLACK);
 
-    print_string1216("- Richtung",
-                            215, 565, COLOR_WHITE, COLOR_BLACK);
-    print_string1216("- Kilometerstand:",
-                                245, 565, COLOR_WHITE, COLOR_BLACK);
-    print_string1216("  in m:",
-                                    270, 565, COLOR_WHITE, COLOR_BLACK);
-    print_string1216("  in km:",
-                                        295, 565, COLOR_WHITE, COLOR_BLACK);
+    print_string1216("- Richtung", 215, 565, COLOR_WHITE, COLOR_BLACK);
+    print_string1216("- Kilometerstand:", 245, 565, COLOR_WHITE, COLOR_BLACK);
+    print_string1216("  in m:", 270, 565, COLOR_WHITE, COLOR_BLACK);
+    print_string1216("  in km:",295, 565, COLOR_WHITE, COLOR_BLACK);
+
+    // Logo
+    drawline_H(555, 795, 350, COLOR_LOGO_BACKGROUND, 80);
+
+    drawline_H(560, 600, 360, COLOR_BLUE_HAW, 3);
+    drawline_H(560, 600, 374, COLOR_BLUE_HAW, 3);
+    drawline_H(560, 600, 388, COLOR_BLUE_HAW, 3);
+    drawline_H(560, 600, 402, COLOR_BLUE_HAW, 3);
+
+    drawline_H(580, 620, 367, COLOR_BLUE, 3);
+    drawline_H(580, 620, 381, COLOR_BLUE, 3);
+    drawline_H(580, 620, 395, COLOR_BLUE, 3);
+    drawline_H(580, 620, 409, COLOR_BLUE, 3);
+
+    print_string1216("H A W", 370, 630, COLOR_BLUE, COLOR_LOGO_BACKGROUND);
+    print_string1216("H A M B U R G", 395, 630, COLOR_BLUE, COLOR_LOGO_BACKGROUND);
+
 
 
 }

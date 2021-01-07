@@ -542,9 +542,9 @@ void drawline(short x1, short y1, short x2, short y2, int color)
                 write_command(0x2C);
                 for (i = y; i <= old_y; i++)
                 {
-                    write_data((color >> 16) & 0xff); // red
-                    write_data((color >> 8) & 0xff); // green
-                    write_data((color) & 0xff); // blue
+                    write_data((color >> 16) & 0xff);   // red
+                    write_data((color >> 8) & 0xff);    // green
+                    write_data((color) & 0xff);         // blue
                 }
                 old_y = y;
             }
@@ -561,9 +561,9 @@ void drawline(short x1, short y1, short x2, short y2, int color)
                 write_command(0x2C);
                 for (i = old_x; i <= x; i++)
                 {
-                    write_data((color >> 16) & 0xff); // red
-                    write_data((color >> 8) & 0xff); // green
-                    write_data((color) & 0xff); // blue
+                    write_data((color >> 16) & 0xff);   // red
+                    write_data((color >> 8) & 0xff);    // green
+                    write_data((color) & 0xff);         // blue
                 }
                 old_x = x;
             }

@@ -10,13 +10,13 @@
 #include "driverlib/gpio.h"      //  Tivaware functions: GPIO... + Macros  GPIO_...
 #include "driverlib/timer.h"
 
-uint32_t sysClock, timerScaler;
+uint32_t sysCLK;
+
 static double speed = 0;
 static int count_impuls = 0;
 static double strecke_in_m = 0;
 static double strecke_in_km = 0;
 int richtung = 0;
-
 
 void Timer1_DisplayIntHandler(void)
 {
@@ -29,24 +29,28 @@ void Timer1_DisplayIntHandler(void)
 
     TimerIntClear(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
 
+    speed = (double) (count_impuls * 1.77);
+    if (speed >= 240)
+    {
+        speed = 240;
+    }
+    strecke_in_m = strecke_in_m + (double) (speed / 18);
+    strecke_in_km = (double) (strecke_in_m / 1000);
 
-    speed = count_impuls;
-    strecke_in_m = strecke_in_m + (double)(speed/18);
-    strecke_in_km = (double)(strecke_in_m/1000);
+    sprintf(buffer1, "%3.2lf", speed);
+    print_string1216("  km/h  ", 380, 225, COLOR_BLACK, COLOR_YELLO);
+    print_string1216(buffer1, 410, 238, COLOR_BLACK, COLOR_YELLO);
 
-    sprintf(buffer1, "%3.2lf km/h", speed);
-    print_string1216(buffer1, 400, 225, COLOR_BLACK, COLOR_YELLO);
 
     sprintf(buffer2, "%3.2lf", strecke_in_m);
     print_string1216(buffer2, 270, 700, COLOR_BLACK, COLOR_YELLO);
 
     sprintf(buffer3, "%3.2lf", strecke_in_km);
-        print_string1216(buffer3, 295, 700, COLOR_BLACK, COLOR_YELLO);
-
+    print_string1216(buffer3, 295, 700, COLOR_BLACK, COLOR_YELLO);
 
     phi = speed + phinull;
-    x = X_CENTER + round(radius* cos((double)(phi)*2*PI/360));
-    y = Y_CENTER + round(radius* sin((double)(phi)*2*PI/360));
+    x = X_CENTER + round(radius * cos((double) (phi) * 2 * PI / 360));
+    y = Y_CENTER + round(radius * sin((double) (phi) * 2 * PI / 360));
 
     // remove a old line and set to background color
     if (x != x_old || y != y_old)
@@ -56,7 +60,7 @@ void Timer1_DisplayIntHandler(void)
     }
 
     // display new line
-    drawline(X_CENTER, Y_CENTER , x, y, COLOR_RED);
+    drawline(X_CENTER, Y_CENTER, x, y, COLOR_RED);
     drawCircle_px(x, y, 6, COLOR_RED, 2);
 
     // display center point
@@ -64,7 +68,8 @@ void Timer1_DisplayIntHandler(void)
     drawCircle_px(X_CENTER, Y_CENTER, 30, COLOR_YELLO, 2);
     print_string1216("Km/h", 135, 253, COLOR_WHITE, COLOR_BLACK);
 
-    x_old = x; y_old = y;
+    x_old = x;
+    y_old = y;
     if (count_impuls == 0)
     {
         print_string1216("( )", 215, 700, COLOR_BLACK, COLOR_YELLO);
@@ -83,11 +88,13 @@ void Timer1_DisplayIntHandler(void)
 
 void Count_IntHandler(void)
 {
-    GPIOIntClear(GPIO_PORTP_BASE,GPIO_PIN_0); // finially not needed, but done as a matter of principle
+    printf("%d\n", count_impuls);
+    GPIOIntClear(GPIO_PORTP_BASE, GPIO_PIN_0); // finially not needed, but done as a matter of principle
     count_impuls++;
     GPIO_PORTN_DATA_R = GPIO_PORTP_DATA_R & 0x03;
 
-    printf("%d\n",count_impuls);
+    printf("%d\n", count_impuls);
+
     if (GPIO_PORTP_DATA_R == 0x03)
     {
         richtung = 1;
@@ -100,28 +107,31 @@ void Count_IntHandler(void)
     {
         richtung = 0;
     }
+    printf("%d\n", count_impuls);
 }
 
-void init_peripherals (void) {
+void init_peripherals(void)
+{
 
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1);       // Clock Gate enable TIMER1
-    SysCtlDelay(10);
-
+    init_and_config_sensor();
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOP);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1);    // Clock Gate enable TIMER1
+    SysCtlDelay(10);
     //pin setup
-    GPIOPinTypeGPIOInput(GPIO_PORTP_BASE, GPIO_PIN_0|GPIO_INT_PIN_1);
+    GPIOPinTypeGPIOInput(GPIO_PORTP_BASE, GPIO_PIN_0 | GPIO_INT_PIN_1);
     // Rising edge type interrupt
-    GPIOIntTypeSet(GPIO_PORTP_BASE, GPIO_PIN_0,GPIO_RISING_EDGE|GPIO_DISCRETE_INT);
+    GPIOIntTypeSet(GPIO_PORTP_BASE, GPIO_PIN_0,
+                   GPIO_RISING_EDGE | GPIO_DISCRETE_INT);
     // "register" entry in  a copied IVT
     GPIOIntRegister(GPIO_PORTP_BASE, Count_IntHandler);
     GPIOIntClear(GPIO_PORTP_BASE, GPIO_PIN_0);          // optional ...
     //IntPrioritySet(INT_GPIOP0, 0x20);                   //high prio
-    GPIOIntEnable(GPIO_PORTP_BASE, GPIO_PIN_0);         // Allow request output from Port unit
-    IntEnable(INT_GPIOP0);                              // Allow request input to NVIC
+    GPIOIntEnable(GPIO_PORTP_BASE, GPIO_PIN_0); // Allow request output from Port unit
+    IntEnable(INT_GPIOP0);                        // Allow request input to NVIC
 
     // Configure Timer1 Interrupt
     TimerConfigure(TIMER1_BASE, TIMER_CFG_PERIODIC);
-    TimerLoadSet(TIMER1_BASE, TIMER_A, sysClock / 5);      // fires every 200 ms
+    TimerLoadSet(TIMER1_BASE, TIMER_A, sysCLK / 5);      // fires every 200 ms
     TimerIntRegister(TIMER1_BASE, TIMER_A, Timer1_DisplayIntHandler);
     IntEnable(INT_TIMER1A);
     TimerIntEnable(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
@@ -132,12 +142,15 @@ void main(void)
 {
     IntMasterDisable();        // as matter of principle
     // Set system frequency to 120 MHz
-    sysClock = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), 120000000);
+    sysCLK = SysCtlClockFreqSet(
+            (SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN | SYSCTL_USE_PLL
+                    | SYSCTL_CFG_VCO_480),
+            120000000);
     init_peripherals();
     init_and_config_display();
     display_layout();
-    init_and_config_sensor();
     IntMasterEnable();
-    while (1);
+    while (1)
+        ;
 }
 
