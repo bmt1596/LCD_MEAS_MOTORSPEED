@@ -1,8 +1,9 @@
 /*
- * sensor.c
- *
- *  Created on: 15 Nov 2020
- *      Author: minht and Hauke Kosmiter
+ * @file        : sensor.c
+ * @author      : Minh Tung Bui and Hauke
+ * @copyright   : HAW-Hamburg
+ * @addtogroup  : component/LCD
+ * @{
  */
 
 #include "sensor.h"

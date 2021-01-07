@@ -1,8 +1,9 @@
 /*
- * fontscharacter.h
- *
- *  Created on: 16 Nov 2020
- *      Author: minht
+ * @file        : fontscharacter.h
+ * @author      : Minh Tung Bui
+ * @copyright   : recalm GmbH
+ * @addtogroup  : component/LCD
+ * @{
  */
 
 #ifndef COMPONENT_LCD_FONTSCHARACTER_H_

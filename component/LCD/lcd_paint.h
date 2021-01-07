@@ -1,11 +1,12 @@
 /*
- * lcd_paint.h
- *
- *  Created on: 2 Dec 2020
- *      Author: minht
+ * @file        : lcd_paint.h
+ * @author      : Minh Tung Bui
+ * @copyright   : HAW-Hamburg
+ * @addtogroup  : component/LCD
+ * @{
  */
 
-
+//<! defines color codes
 #define COLOR_BLACK             0x00000000
 #define COLOR_WHITE             0x00FFFFFF
 #define COLOR_GREY              0x00AAAAAA
@@ -17,10 +18,21 @@
 #define COLOR_LOGO_BACKGROUND   0x00F2F3F4
 #define COLOR_BLUE_HAW          0x00A1CAF1
 
+//<! midpoint coordinates of tacho
 #define X_CENTER 275
 #define Y_CENTER 270
 #define PI 3.141596
 
-
+/**********************************************************************************
+   * @brief     function to display the layout of Tacho
+   * @details   void
+   * @returns   void
+ */
 void display_layout(void);
+
+/**********************************************************************************
+   * @brief     function to display the information about project
+   * @details   void
+   * @returns   void
+ */
 void display_project_information(void);

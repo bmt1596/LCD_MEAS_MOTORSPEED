@@ -1,12 +1,19 @@
 /*
- * lcd_paint.c
- *
- *  Created on: 2 Dec 2020
- *      Author: minht
+ * @file        : lcd_paint.c
+ * @author      : Minh Tung Bui
+ * @copyright   : HAW-Hamburg
+ * @addtogroup  : component/LCD
+ * @{
  */
+
 #include <component/LCD/lcd_paint.h>
 #include <component/LCD/lcd_config.h>
 
+/**********************************************************************************
+   * @brief     function to display the layout of Tacho
+   * @details   void
+   * @returns   void
+ */
 void display_layout(void)
 {
     // display information for MC project and team
@@ -60,7 +67,6 @@ void display_layout(void)
     // outside white circle
     drawCircle_px(X_CENTER, Y_CENTER, 235, COLOR_WHITE, 4);
 
-
     // display center point
     drawCircle_px(X_CENTER, Y_CENTER, 6, COLOR_WHITE, 4);
 
@@ -70,11 +76,13 @@ void display_layout(void)
     // display under black line
     drawline_H(0, 550, 470, COLOR_BLACK, 10);
     drawline_H(154, 395, 470, COLOR_WHITE, 3);
-
-
 }
 
-
+/**********************************************************************************
+   * @brief     function to display the information about project
+   * @details   void
+   * @returns   void
+ */
 void display_project_information(void)
 {
     set_background_color(COLOR_BLACK);
@@ -104,7 +112,7 @@ void display_project_information(void)
     print_string1216("  in m:", 270, 565, COLOR_WHITE, COLOR_BLACK);
     print_string1216("  in km:",295, 565, COLOR_WHITE, COLOR_BLACK);
 
-    // Logo
+    // HAW Logo
     drawline_H(555, 795, 350, COLOR_LOGO_BACKGROUND, 80);
 
     drawline_H(560, 600, 360, COLOR_BLUE_HAW, 3);
@@ -119,9 +127,6 @@ void display_project_information(void)
 
     print_string1216("H A W", 370, 630, COLOR_BLUE, COLOR_LOGO_BACKGROUND);
     print_string1216("H A M B U R G", 395, 630, COLOR_BLUE, COLOR_LOGO_BACKGROUND);
-
-
-
 }
 
 
