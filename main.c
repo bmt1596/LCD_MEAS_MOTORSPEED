@@ -1,3 +1,11 @@
+/*
+ * @file        : lcd_paint.c
+ * @author      : Minh Tung Bui and Hauke
+ * @copyright   : HAW-Hamburg
+ * @addtogroup  : component/LCD
+ * @{
+ */
+
 #include <component/LCD/lcd_config.h>
 #include <component/LCD/lcd_paint.h>
 #include <component/Sensor/sensor.h>
@@ -10,13 +18,19 @@
 #include "driverlib/gpio.h"      //  Tivaware functions: GPIO... + Macros  GPIO_...
 #include "driverlib/timer.h"
 
-uint32_t sysCLK;
+typedef float float32_t;
 
-static double speed = 0;
-static int count_impuls = 0;
-static double strecke_in_m = 0;
-static double strecke_in_km = 0;
-int richtung = 0;
+
+uint32_t sysCLK;
+uint32_t sensor_count_impuls = 0;
+uint8_t move_direction;
+
+float32_t veclocity_tacho = 0;
+float32_t distance_in_m = 0;
+float32_t distance_in_km = 0;
+
+
+enum direction{FORWARD, BACKWARD, STATIONARY };
 
 void Timer1_DisplayIntHandler(void)
 {
@@ -29,26 +43,26 @@ void Timer1_DisplayIntHandler(void)
 
     TimerIntClear(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
 
-    speed = (double) (count_impuls * 1.77);
-    if (speed >= 240)
+    veclocity_tacho = (double) (sensor_count_impuls * 1.77);
+    if (veclocity_tacho >= 240)
     {
-        speed = 240;
+        veclocity_tacho = 240;
     }
-    strecke_in_m = strecke_in_m + (double) (speed / 18);
-    strecke_in_km = (double) (strecke_in_m / 1000);
+    distance_in_m = distance_in_m + (double) (veclocity_tacho / 18);
+    distance_in_km = (double) (distance_in_m / 1000);
 
-    sprintf(buffer1, "%3.2lf", speed);
+    sprintf(buffer1, "%3.2lf", veclocity_tacho);
     print_string1216("  km/h  ", 380, 225, COLOR_BLACK, COLOR_YELLO);
     print_string1216(buffer1, 410, 238, COLOR_BLACK, COLOR_YELLO);
 
 
-    sprintf(buffer2, "%3.2lf", strecke_in_m);
+    sprintf(buffer2, "%3.2lf", distance_in_m);
     print_string1216(buffer2, 270, 700, COLOR_BLACK, COLOR_YELLO);
 
-    sprintf(buffer3, "%3.2lf", strecke_in_km);
+    sprintf(buffer3, "%3.2lf", distance_in_km);
     print_string1216(buffer3, 295, 700, COLOR_BLACK, COLOR_YELLO);
 
-    phi = speed + phinull;
+    phi = veclocity_tacho + phinull;
     x = X_CENTER + round(radius * cos((double) (phi) * 2 * PI / 360));
     y = Y_CENTER + round(radius * sin((double) (phi) * 2 * PI / 360));
 
@@ -70,53 +84,55 @@ void Timer1_DisplayIntHandler(void)
 
     x_old = x;
     y_old = y;
-    if (count_impuls == 0)
+    if (sensor_count_impuls == 0)
     {
         print_string1216("( )", 215, 700, COLOR_BLACK, COLOR_YELLO);
     }
-    if (richtung == 1)
+    if (move_direction == FORWARD)
     {
         print_string1216("(V)", 215, 700, COLOR_BLACK, COLOR_YELLO);
     }
-    else if (richtung == 2)
+    else if (move_direction == BACKWARD)
     {
         print_string1216("(R)", 215, 700, COLOR_BLACK, COLOR_YELLO);
     }
 
-    count_impuls = 0;
+    sensor_count_impuls = 0;
 }
 
 void Count_IntHandler(void)
 {
-    printf("%d\n", count_impuls);
+    printf("%d\n", sensor_count_impuls);
     GPIOIntClear(GPIO_PORTP_BASE, GPIO_PIN_0); // finially not needed, but done as a matter of principle
-    count_impuls++;
+    sensor_count_impuls++;
     GPIO_PORTN_DATA_R = GPIO_PORTP_DATA_R & 0x03;
 
-    printf("%d\n", count_impuls);
+    printf("%d\n", sensor_count_impuls);
 
     if (GPIO_PORTP_DATA_R == 0x03)
     {
-        richtung = 1;
+        move_direction = FORWARD;
     }
     else if (GPIO_PORTP_DATA_R == 0x02)
     {
-        richtung = 2;
+        move_direction = BACKWARD;
     }
     else if (GPIO_PORTP_DATA_R == 0x00)
     {
-        richtung = 0;
+        move_direction = STATIONARY;
     }
-    printf("%d\n", count_impuls);
+    printf("%d\n", sensor_count_impuls);
 }
 
 void init_peripherals(void)
 {
 
     init_and_config_sensor();
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOP);
+    //SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOP);
     SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1);    // Clock Gate enable TIMER1
-    SysCtlDelay(10);
+    //SysCtlDelay(10);
+
+
     //pin setup
     GPIOPinTypeGPIOInput(GPIO_PORTP_BASE, GPIO_PIN_0 | GPIO_INT_PIN_1);
     // Rising edge type interrupt

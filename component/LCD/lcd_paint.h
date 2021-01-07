@@ -7,16 +7,19 @@
  */
 
 //<! defines color codes
-#define COLOR_BLACK             0x00000000
-#define COLOR_WHITE             0x00FFFFFF
-#define COLOR_GREY              0x00AAAAAA
-#define COLOR_RED               0x00FF0000
-#define COLOR_GREEN             0x0000FF00
-#define COLOR_BLUE              0x000000FF
-#define COLOR_YELLO             0x00FFFF00
-#define COLOR_GOUND             0x0036454F
-#define COLOR_LOGO_BACKGROUND   0x00F2F3F4
-#define COLOR_BLUE_HAW          0x00A1CAF1
+enum color
+{
+    COLOR_BLACK             = 0x00000000,
+    COLOR_WHITE             = 0x00FFFFFF,
+    COLOR_GREY              = 0x00AAAAAA,
+    COLOR_RED               = 0x00FF0000,
+    COLOR_GREEN             = 0x0000FF00,
+    COLOR_BLUE              = 0x000000FF,
+    COLOR_YELLO             = 0x00FFFF00,
+    COLOR_GOUND             = 0x0036454F,
+    COLOR_LOGO_BACKGROUND   = 0x00F2F3F4,
+    COLOR_BLUE_HAW          = 0x00A1CAF1
+};
 
 //<! midpoint coordinates of tacho
 #define X_CENTER 275
