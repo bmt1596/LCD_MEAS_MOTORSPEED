@@ -10,6 +10,7 @@
 #include <component/LCD/lcd_paint.h>
 #include <component/Sensor/sensor.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <math.h>
 
 
@@ -81,6 +82,7 @@ void Timer1_DisplayIntHandler(void)
     {
         veclocity_tacho = 240;
     }
+
     distance_in_m = distance_in_m + (double) (veclocity_tacho / 18);
     distance_in_km = (double) (distance_in_m / 1000);
 
@@ -130,8 +132,10 @@ void Timer1_DisplayIntHandler(void)
         print_string1216("(R)", 215, 700, COLOR_BLACK, COLOR_YELLO);
     }
 
+    //printf("Geschwindigkeit ist : %lf km/h.\n",veclocity_tacho);
     S2counter = 0;
     move_direction = STATIONARY;
+    //display_layout();
 
 }
 
@@ -142,6 +146,7 @@ void init_peripherals(void)
     int i = 0;
     //Configurations of Port Pin as interrupts source
     SYSCTL_RCGCGPIO_R = 0x2000; // switch clock on for Port P
+
     i++; // wait for clock stable at periphery
     GPIO_PORTP_DEN_R |= 0x03; // enable P0 & P1
     GPIO_PORTP_DIR_R &= ~0x03; // input P0 & P1
@@ -176,17 +181,15 @@ void init_peripherals(void)
     // Set Port L Pins 0-4: used as Output of LCD Control signals:
     GPIOPinTypeGPIOOutput(GPIO_PORTL_BASE, 0x1F);
 
-
     // TIMER
     /********************************************************************************/
     // Configure Timer1 Interrupt
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1);           // Clock Gate enable TIMER1
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1);    // Clock Gate enable TIMER1
     TimerConfigure(TIMER1_BASE, TIMER_CFG_PERIODIC);
-    TimerLoadSet(TIMER1_BASE, TIMER_A, sysCLK / 2.5);         // fires every 200 ms
+    TimerLoadSet(TIMER1_BASE, TIMER_A, sysCLK / 2.5);      // fires every 200 ms
     TimerIntRegister(TIMER1_BASE, TIMER_A, Timer1_DisplayIntHandler);
     IntEnable(INT_TIMER1A);
     TimerIntEnable(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
-    TimerEnable(TIMER1_BASE, TIMER_A);
 }
 
 
@@ -198,6 +201,8 @@ void main(void)
 
     configure_display_controller_large();
     display_layout();
+
+    TimerEnable(TIMER1_BASE, TIMER_A);
 
     while (1);
 }
