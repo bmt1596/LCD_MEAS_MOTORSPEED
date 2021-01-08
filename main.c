@@ -39,9 +39,7 @@ float32_t distance_in_km = 0;
 enum direction{FORWARD, BACKWARD, STATIONARY };
 
 void Timer1_DisplayIntHandler(void);
-void Count_IntHandler(void);
 void init_peripherals(void);
-void init_Port_P(void);
 void S1Handler(void);
 void S2Handler(void);
 
@@ -78,7 +76,7 @@ void Timer1_DisplayIntHandler(void)
 
     TimerIntClear(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
 
-    veclocity_tacho = (double) (S2counter * 1.19);
+    veclocity_tacho = (double) (S2counter * 1.151);
     if (veclocity_tacho >= 240)
     {
         veclocity_tacho = 240;
@@ -141,9 +139,23 @@ void init_peripherals(void)
 {
     // CLOCK GATES ENABLE
     /********************************************************************************/
-
-    // PERIPHERY CLOCK ENABLE
-    /********************************************************************************/
+    int i = 0;
+    //Configurations of Port Pin as interrupts source
+    SYSCTL_RCGCGPIO_R = 0x2000; // switch clock on for Port P
+    i++; // wait for clock stable at periphery
+    GPIO_PORTP_DEN_R |= 0x03; // enable P0 & P1
+    GPIO_PORTP_DIR_R &= ~0x03; // input P0 & P1
+    GPIO_PORTP_IS_R &= ~0x03; // boht pins generates edge−sensitive requests
+    GPIO_PORTP_IBE_R &= ~0x03; // not use both edges
+    //GPIO_PORTP_IBE_R |= 0x03; // alternative use both edges
+    GPIO_PORTP_IEV_R |= 0x03; //interrupt events are rising edges
+    GPIO_PORTP_ICR_R |= 0x03; //clear interrupt requests
+    GPIO_PORTP_IM_R |= 0x03; // unmask P0 and P1 as I−Sources
+    GPIO_PORTP_SI_R |= 0x01; // speciality of Port P and Q
+    // here sete P0 and P1 as seperate source <===== Each pin has its own interrupt vector. page 750 and 791 manua l
+    // GPIO_PORTP_SI_R &= ~0x01; // alternative : summary interrupt for ALL Pins of Port P
+    NVIC_EN2_R |= 0x3000; // enable Port P I−Requests in the NVIC
+    //printf("Count Interrupt Requests and Levels at P0 und P1 \n");
 
     // Set Port N Pins 0-1: used for LED signals
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPION);            // Clock Gate enable GPIO/N
@@ -178,40 +190,15 @@ void init_peripherals(void)
 }
 
 
-void init_Port_P(void)
-{
-    int i = 0;
-    //Configurations of Port Pin as interrupts source
-    SYSCTL_RCGCGPIO_R = 0x2000; // switch clock on for Port P
-    i++; // wait for clock stable at periphery
-    GPIO_PORTP_DEN_R |= 0x03; // enable P0 & P1
-    GPIO_PORTP_DIR_R &= ~0x03; // input P0 & P1
-    GPIO_PORTP_IS_R &= ~0x03; // boht pins generates edge−sensitive requests
-    GPIO_PORTP_IBE_R &= ~0x03; // not use both edges
-    //GPIO_PORTP_IBE_R |= 0x03; // alternative use both edges
-    GPIO_PORTP_IEV_R |= 0x03; //interrupt events are rising edges
-    GPIO_PORTP_ICR_R |= 0x03; //clear interrupt requests
-    GPIO_PORTP_IM_R |= 0x03; // unmask P0 and P1 as I−Sources
-    GPIO_PORTP_SI_R |= 0x01; // speciality of Port P and Q
-    // here sete P0 and P1 as seperate source <===== Each pin has its own interrupt vector. page 750 and 791 manua l
-    // GPIO_PORTP_SI_R &= ~0x01; // alternative : summary interrupt for ALL Pins of Port P
-    NVIC_EN2_R |= 0x3000; // enable Port P I−Requests in the NVIC
-    //printf("Count Interrupt Requests and Levels at P0 und P1 \n");
-}
-
-
 void main(void)
 {
     // Set system frequency to 120 MHz
-    init_Port_P();
     sysCLK = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), 120000000);
-
     init_peripherals();
+
     configure_display_controller_large();
     display_layout();
 
-
     while (1);
-
 }
 
