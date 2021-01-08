@@ -46,7 +46,7 @@ void Timer1_DisplayIntHandler(void)
 
     TimerIntClear(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
 
-    veclocity_tacho = (double) (sensor_count_impuls * 1.77);
+    veclocity_tacho = (double) (sensor_count_impuls * 1.91);
     if (veclocity_tacho >= 240)
     {
         veclocity_tacho = 240;
@@ -106,21 +106,24 @@ void Timer1_DisplayIntHandler(void)
 void Count_IntHandler(void)
 {
     printf("%d\n", sensor_count_impuls);
+
     GPIOIntClear(GPIO_PORTP_BASE, GPIO_PIN_0); // finially not needed, but done as a matter of principle
+    SysTickDisable();
+
     sensor_count_impuls++;
     GPIO_PORTN_DATA_R = GPIO_PORTP_DATA_R & 0x03;
 
     printf("%d\n", sensor_count_impuls);
 
-    if (GPIO_PORTP_DATA_R == 0x03)
+    if (GPIO_PORTN_DATA_R == 0x03)
     {
         move_direction = FORWARD;
     }
-    else if (GPIO_PORTP_DATA_R == 0x02)
+    else if (GPIO_PORTN_DATA_R == 0x02)
     {
         move_direction = BACKWARD;
     }
-    else if (GPIO_PORTP_DATA_R == 0x00)
+    else if (GPIO_PORTN_DATA_R == 0x00 || GPIO_PORTN_DATA_R == 0x01 )
     {
         move_direction = STATIONARY;
     }
@@ -129,26 +132,55 @@ void Count_IntHandler(void)
 
 void init_peripherals(void)
 {
+    // CLOCK GATES ENABLE
+    /********************************************************************************/
+    IntMasterDisable();
 
-     init_and_config_sensor();
+    // PERIPHERY CLOCK ENABLE
+    /********************************************************************************/
 
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOP);
-    //pin setup
-    GPIOPinTypeGPIOInput(GPIO_PORTP_BASE, GPIO_PIN_0 | GPIO_INT_PIN_1);
+    // Set Port P Pins 0-1: used as Interrupts
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOP);            // Clock Gate enable GPIO/P
+    while (!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOP));    // wait until Port P ready
+
+    // Set Port N Pins 0-1: used for LED signals
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPION);            // Clock Gate enable GPIO/N
+    while (!SysCtlPeripheralReady(SYSCTL_PERIPH_GPION));    // wait until Port N ready
+
+    // Set Port M Pins 0-7: used as Output of LCD Data
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOM);            // enable clock-gate Port M
+    while (!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOM));    // wait until clock ready
+
+    // Set Port L Pins 0-4: used as Output of LCD Control signals:
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOL);            // enable clock-gate Port L
+    while (!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOL)) ;   // wait until clock ready
+
+    // Port N: LED signals output
+    GPIOPinTypeGPIOOutput(GPIO_PORTN_BASE, GPIO_PIN_0 | GPIO_PIN_1); // PortN
+    // Set Port M Pins 0-7: used as Output of LCD Data
+    GPIOPinTypeGPIOOutput(GPIO_PORTM_BASE, 0xFF);
+    // Set Port L Pins 0-4: used as Output of LCD Control signals:
+    GPIOPinTypeGPIOOutput(GPIO_PORTL_BASE, 0x1F);
+
+    // INTERRUPTS
+    /********************************************************************************/
+    GPIOPinTypeGPIOInput(GPIO_PORTP_BASE, GPIO_PIN_0 | GPIO_PIN_1);
+    GPIO_PORTP_DEN_R = 0x03;
     // Rising edge type interrupt
-    GPIOIntTypeSet(GPIO_PORTP_BASE, GPIO_PIN_0,
-                   GPIO_RISING_EDGE | GPIO_DISCRETE_INT);
+    GPIOIntTypeSet(GPIO_PORTP_BASE, GPIO_PIN_0, GPIO_RISING_EDGE | GPIO_DISCRETE_INT);
     // "register" entry in  a copied IVT
     GPIOIntRegister(GPIO_PORTP_BASE, Count_IntHandler);
-    GPIOIntClear(GPIO_PORTP_BASE, GPIO_PIN_0);          // optional ...
-    //IntPrioritySet(INT_GPIOP0, 0x20);                   //high prio
-    GPIOIntEnable(GPIO_PORTP_BASE, GPIO_PIN_0); // Allow request output from Port unit
-    IntEnable(INT_GPIOP0);                        // Allow request input to NVIC
+    GPIOIntClear(GPIO_PORTP_BASE, GPIO_PIN_0);              // optional ...
+    //IntPrioritySet(INT_GPIOP0, 0x20);                     //high prio
+    GPIOIntEnable(GPIO_PORTP_BASE, GPIO_PIN_0);             // Allow request output from Port unit
+    IntEnable(INT_GPIOP0);                                  // Allow request input to NVIC
 
+    // TIMER
+    /********************************************************************************/
     // Configure Timer1 Interrupt
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1);    // Clock Gate enable TIMER1
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1);           // Clock Gate enable TIMER1
     TimerConfigure(TIMER1_BASE, TIMER_CFG_PERIODIC);
-    TimerLoadSet(TIMER1_BASE, TIMER_A, sysCLK / 5);      // fires every 200 ms
+    TimerLoadSet(TIMER1_BASE, TIMER_A, sysCLK / 5);         // fires every 200 ms
     TimerIntRegister(TIMER1_BASE, TIMER_A, Timer1_DisplayIntHandler);
     IntEnable(INT_TIMER1A);
     TimerIntEnable(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
@@ -157,14 +189,12 @@ void init_peripherals(void)
 
 void main(void)
 {
-    IntMasterDisable();        // as matter of principle
     // Set system frequency to 120 MHz
-    sysCLK = SysCtlClockFreqSet(
-            (SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN | SYSCTL_USE_PLL
-                    | SYSCTL_CFG_VCO_480),
-            120000000);
+    sysCLK = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), 120000000);
+
     init_peripherals();
-    init_and_config_display();
+    configure_display_controller_large();
+
     display_layout();
     IntMasterEnable();
     while (1)
