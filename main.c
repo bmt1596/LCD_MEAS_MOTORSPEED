@@ -23,9 +23,11 @@
 
 typedef float float32_t;
 
-
+// global testvariables
 uint32_t sysCLK;
-uint32_t sensor_count_impuls = 0;
+uint32_t S1counter = 0;
+uint32_t S2counter = 0;
+
 uint8_t move_direction;
 
 float32_t veclocity_tacho = 0;
@@ -33,7 +35,37 @@ float32_t distance_in_m = 0;
 float32_t distance_in_km = 0;
 
 
+
 enum direction{FORWARD, BACKWARD, STATIONARY };
+
+void Timer1_DisplayIntHandler(void);
+void Count_IntHandler(void);
+void init_peripherals(void);
+void init_Port_P(void);
+void S1Handler(void);
+void S2Handler(void);
+
+void S1Handler(void)
+{
+    GPIO_PORTP_ICR_R |= 0x01; //clear interrupt p0
+    S1counter++; // count of runs of this handler
+    GPIO_PORTP_ICR_R |= 0x01; //clear interrupt p0
+}
+
+void S2Handler(void)
+{
+    GPIO_PORTP_ICR_R |= 0x02; //clear interrupt p1
+    S2counter++; // count the runs of this handler
+
+    if (GPIO_PORTP_DATA_R & 0x02 == 0x02)
+    {
+        move_direction = BACKWARD;
+    }
+    else
+    {
+        move_direction = FORWARD;
+    }
+}
 
 void Timer1_DisplayIntHandler(void)
 {
@@ -46,7 +78,7 @@ void Timer1_DisplayIntHandler(void)
 
     TimerIntClear(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
 
-    veclocity_tacho = (double) (sensor_count_impuls * 1.91);
+    veclocity_tacho = (double) (S2counter * 1.19);
     if (veclocity_tacho >= 240)
     {
         veclocity_tacho = 240;
@@ -57,7 +89,6 @@ void Timer1_DisplayIntHandler(void)
     sprintf(buffer1, "%3.2lf", veclocity_tacho);
     print_string1216("  km/h  ", 380, 225, COLOR_BLACK, COLOR_YELLO);
     print_string1216(buffer1, 410, 238, COLOR_BLACK, COLOR_YELLO);
-
 
     sprintf(buffer2, "%3.2lf", distance_in_m);
     print_string1216(buffer2, 270, 700, COLOR_BLACK, COLOR_YELLO);
@@ -87,11 +118,12 @@ void Timer1_DisplayIntHandler(void)
 
     x_old = x;
     y_old = y;
-    if (sensor_count_impuls == 0)
+
+    if (move_direction == STATIONARY)
     {
         print_string1216("( )", 215, 700, COLOR_BLACK, COLOR_YELLO);
     }
-    if (move_direction == FORWARD)
+    else if (move_direction == FORWARD)
     {
         print_string1216("(V)", 215, 700, COLOR_BLACK, COLOR_YELLO);
     }
@@ -100,48 +132,18 @@ void Timer1_DisplayIntHandler(void)
         print_string1216("(R)", 215, 700, COLOR_BLACK, COLOR_YELLO);
     }
 
-    sensor_count_impuls = 0;
-}
+    S2counter = 0;
+    move_direction = STATIONARY;
 
-void Count_IntHandler(void)
-{
-    printf("%d\n", sensor_count_impuls);
-
-    GPIOIntClear(GPIO_PORTP_BASE, GPIO_PIN_0); // finially not needed, but done as a matter of principle
-    SysTickDisable();
-
-    sensor_count_impuls++;
-    GPIO_PORTN_DATA_R = GPIO_PORTP_DATA_R & 0x03;
-
-    printf("%d\n", sensor_count_impuls);
-
-    if (GPIO_PORTN_DATA_R == 0x03)
-    {
-        move_direction = FORWARD;
-    }
-    else if (GPIO_PORTN_DATA_R == 0x02)
-    {
-        move_direction = BACKWARD;
-    }
-    else if (GPIO_PORTN_DATA_R == 0x00 || GPIO_PORTN_DATA_R == 0x01 )
-    {
-        move_direction = STATIONARY;
-    }
-    printf("%d\n", sensor_count_impuls);
 }
 
 void init_peripherals(void)
 {
     // CLOCK GATES ENABLE
     /********************************************************************************/
-    IntMasterDisable();
 
     // PERIPHERY CLOCK ENABLE
     /********************************************************************************/
-
-    // Set Port P Pins 0-1: used as Interrupts
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOP);            // Clock Gate enable GPIO/P
-    while (!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOP));    // wait until Port P ready
 
     // Set Port N Pins 0-1: used for LED signals
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPION);            // Clock Gate enable GPIO/N
@@ -162,42 +164,54 @@ void init_peripherals(void)
     // Set Port L Pins 0-4: used as Output of LCD Control signals:
     GPIOPinTypeGPIOOutput(GPIO_PORTL_BASE, 0x1F);
 
-    // INTERRUPTS
-    /********************************************************************************/
-    GPIOPinTypeGPIOInput(GPIO_PORTP_BASE, GPIO_PIN_0 | GPIO_PIN_1);
-    GPIO_PORTP_DEN_R = 0x03;
-    // Rising edge type interrupt
-    GPIOIntTypeSet(GPIO_PORTP_BASE, GPIO_PIN_0, GPIO_RISING_EDGE | GPIO_DISCRETE_INT);
-    // "register" entry in  a copied IVT
-    GPIOIntRegister(GPIO_PORTP_BASE, Count_IntHandler);
-    GPIOIntClear(GPIO_PORTP_BASE, GPIO_PIN_0);              // optional ...
-    //IntPrioritySet(INT_GPIOP0, 0x20);                     //high prio
-    GPIOIntEnable(GPIO_PORTP_BASE, GPIO_PIN_0);             // Allow request output from Port unit
-    IntEnable(INT_GPIOP0);                                  // Allow request input to NVIC
 
     // TIMER
     /********************************************************************************/
     // Configure Timer1 Interrupt
     SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1);           // Clock Gate enable TIMER1
     TimerConfigure(TIMER1_BASE, TIMER_CFG_PERIODIC);
-    TimerLoadSet(TIMER1_BASE, TIMER_A, sysCLK / 5);         // fires every 200 ms
+    TimerLoadSet(TIMER1_BASE, TIMER_A, sysCLK / 2.5);         // fires every 200 ms
     TimerIntRegister(TIMER1_BASE, TIMER_A, Timer1_DisplayIntHandler);
     IntEnable(INT_TIMER1A);
     TimerIntEnable(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
     TimerEnable(TIMER1_BASE, TIMER_A);
 }
 
+
+void init_Port_P(void)
+{
+    int i = 0;
+    //Configurations of Port Pin as interrupts source
+    SYSCTL_RCGCGPIO_R = 0x2000; // switch clock on for Port P
+    i++; // wait for clock stable at periphery
+    GPIO_PORTP_DEN_R |= 0x03; // enable P0 & P1
+    GPIO_PORTP_DIR_R &= ~0x03; // input P0 & P1
+    GPIO_PORTP_IS_R &= ~0x03; // boht pins generates edge−sensitive requests
+    GPIO_PORTP_IBE_R &= ~0x03; // not use both edges
+    //GPIO_PORTP_IBE_R |= 0x03; // alternative use both edges
+    GPIO_PORTP_IEV_R |= 0x03; //interrupt events are rising edges
+    GPIO_PORTP_ICR_R |= 0x03; //clear interrupt requests
+    GPIO_PORTP_IM_R |= 0x03; // unmask P0 and P1 as I−Sources
+    GPIO_PORTP_SI_R |= 0x01; // speciality of Port P and Q
+    // here sete P0 and P1 as seperate source <===== Each pin has its own interrupt vector. page 750 and 791 manua l
+    // GPIO_PORTP_SI_R &= ~0x01; // alternative : summary interrupt for ALL Pins of Port P
+    NVIC_EN2_R |= 0x3000; // enable Port P I−Requests in the NVIC
+    //printf("Count Interrupt Requests and Levels at P0 und P1 \n");
+}
+
+
 void main(void)
 {
     // Set system frequency to 120 MHz
+    init_Port_P();
     sysCLK = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), 120000000);
 
     init_peripherals();
     configure_display_controller_large();
-
     display_layout();
-    IntMasterEnable();
-    while (1)
-        ;
+
+
+    while (1);
+
 }
 
