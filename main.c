@@ -1,6 +1,6 @@
 /*
  * @file        : lcd_paint.c
- * @author      : Minh Tung Bui and Hauke
+ * @author      : Minh Tung Bui and Hauke Kosmiter
  * @copyright   : HAW-Hamburg
  * @addtogroup  : component/LCD
  * @{
@@ -12,6 +12,9 @@
 #include <stdio.h>
 #include <math.h>
 
+
+#include "inc/tm4c1294ncpdt.h" // Macros fpr Registers and Bitfields
+#include "inc/hw_memmap.h" //  Tivaware Macros ...BASE as base address for peripheral modules
 #include "driverlib/systick.h"   //  Tivaware functions: SysTick...
 #include "driverlib/interrupt.h" //  Tivaware functions: Int...
 #include "driverlib/sysctl.h"    //  Tivaware functions: SysCtl...  + Macros  SYSCTL_...
@@ -127,12 +130,9 @@ void Count_IntHandler(void)
 void init_peripherals(void)
 {
 
-    init_and_config_sensor();
-    //SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOP);
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1);    // Clock Gate enable TIMER1
-    //SysCtlDelay(10);
+     init_and_config_sensor();
 
-
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOP);
     //pin setup
     GPIOPinTypeGPIOInput(GPIO_PORTP_BASE, GPIO_PIN_0 | GPIO_INT_PIN_1);
     // Rising edge type interrupt
@@ -146,6 +146,7 @@ void init_peripherals(void)
     IntEnable(INT_GPIOP0);                        // Allow request input to NVIC
 
     // Configure Timer1 Interrupt
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1);    // Clock Gate enable TIMER1
     TimerConfigure(TIMER1_BASE, TIMER_CFG_PERIODIC);
     TimerLoadSet(TIMER1_BASE, TIMER_A, sysCLK / 5);      // fires every 200 ms
     TimerIntRegister(TIMER1_BASE, TIMER_A, Timer1_DisplayIntHandler);

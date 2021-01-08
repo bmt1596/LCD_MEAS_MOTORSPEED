@@ -1,6 +1,6 @@
 /*
  * @file        : lcd_paint.h
- * @author      : Minh Tung Bui
+ * @author      : Minh Tung Bui and Hauke Kosmiter
  * @copyright   : HAW-Hamburg
  * @addtogroup  : component/LCD
  * @{

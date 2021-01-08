@@ -1,6 +1,6 @@
 /*
  * @file        : fontscharacter.h
- * @author      : Minh Tung Bui
+ * @author      : Minh Tung Bui and Hauke Kosmiter
  * @copyright   : recalm GmbH
  * @addtogroup  : component/LCD
  * @{

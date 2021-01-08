@@ -1,6 +1,6 @@
 /*
  * @file        : sensor.h
- * @author      : Minh Tung Bui and Hauke
+ * @author      : Minh Tung Bui and Hauke Kosmiter
  * @copyright   : HAW-Hamburg
  * @addtogroup  : component/LCD
  * @{
