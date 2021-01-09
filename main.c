@@ -35,7 +35,9 @@ float32_t veclocity_tacho = 0;
 float32_t distance_in_m = 0;
 float32_t distance_in_km = 0;
 
-enum direction{FORWARD, BACKWARD, STATIONARY };
+bool toggle = true;
+
+enum direction{FORWARD, BACKWARD, STILL };
 
 void Timer1_DisplayIntHandler(void);
 void init_peripherals(void);
@@ -76,9 +78,25 @@ void Timer1_DisplayIntHandler(void)
     TimerIntClear(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
 
     veclocity_tacho = (double) (S2counter * 1.151);
-    if (veclocity_tacho >= 240)
+
+    if(veclocity_tacho > 180)
+    {
+        if (toggle == true)
+        {
+            print_string1216("TOO FAST!!", 350, 220, COLOR_RED, COLOR_BLACK);
+        }else
+        {
+            print_string1216("          ", 350, 220, COLOR_BLACK, COLOR_BLACK);
+        }
+
+    }
+    else if (veclocity_tacho >= 240)
     {
         veclocity_tacho = 240;
+    }
+    else
+    {
+        print_string1216("          ", 350, 220, COLOR_BLACK, COLOR_BLACK);
     }
 
     distance_in_m = distance_in_m + (double) (veclocity_tacho / 9);
@@ -130,9 +148,18 @@ void Timer1_DisplayIntHandler(void)
 
     switch (move_direction)
     {
-    case STATIONARY:
+    case STILL:
         print_string1216("( )", 215, 700, COLOR_BLACK, COLOR_YELLO);
-        print_string1216("  STOP  ", 450, 230, COLOR_RED, COLOR_BLACK);
+
+        if (toggle == true)
+        {
+            print_string1216("  NONE  ", 450, 230, COLOR_RED, COLOR_BLACK);
+        }
+        else
+        {
+            print_string1216("        ", 450, 230, COLOR_RED, COLOR_BLACK);
+        }
+
         break;
     case FORWARD:
         print_string1216("(V)", 215, 700, COLOR_BLACK, COLOR_YELLO);
@@ -147,7 +174,9 @@ void Timer1_DisplayIntHandler(void)
     }
 
     S2counter = 0;
-    move_direction = STATIONARY;
+    move_direction = STILL;
+
+    toggle = !toggle;
 
 }
 
