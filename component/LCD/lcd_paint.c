@@ -131,6 +131,8 @@ void display_project_information(void)
 
     print_string1216("H A W", 370, 630, COLOR_BLUE, COLOR_LOGO_BACKGROUND);
     print_string1216("H A M B U R G", 395, 630, COLOR_BLUE, COLOR_LOGO_BACKGROUND);
+    // Datum
+    print_string1216("19.01.2021", 450, 670, COLOR_WHITE, COLOR_BLACK);
 }
 
 

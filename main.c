@@ -35,8 +35,6 @@ float32_t veclocity_tacho = 0;
 float32_t distance_in_m = 0;
 float32_t distance_in_km = 0;
 
-
-
 enum direction{FORWARD, BACKWARD, STATIONARY };
 
 void Timer1_DisplayIntHandler(void);
@@ -150,6 +148,7 @@ void Timer1_DisplayIntHandler(void)
 
     S2counter = 0;
     move_direction = STATIONARY;
+
 }
 
 void init_peripherals(void)
