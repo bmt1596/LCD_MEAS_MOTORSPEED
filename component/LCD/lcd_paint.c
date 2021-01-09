@@ -76,6 +76,10 @@ void display_layout(void)
     // display under black line
     drawline_H(0, 550, 470, COLOR_BLACK, 10);
     drawline_H(154, 395, 470, COLOR_WHITE, 3);
+    drawline_H(154, 395, 400, COLOR_WHITE, 1);
+    drawline_V(400, 470, 154, COLOR_WHITE, 1);
+    drawline_V(400, 470, 154, COLOR_WHITE, 1);
+    drawline_V(400, 470, 395, COLOR_WHITE, 1);
 }
 
 /**********************************************************************************

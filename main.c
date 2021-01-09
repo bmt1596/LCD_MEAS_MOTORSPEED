@@ -83,12 +83,23 @@ void Timer1_DisplayIntHandler(void)
         veclocity_tacho = 240;
     }
 
-    distance_in_m = distance_in_m + (double) (veclocity_tacho / 18);
+    distance_in_m = distance_in_m + (double) (veclocity_tacho / 9);
     distance_in_km = (double) (distance_in_m / 1000);
 
-    sprintf(buffer1, "%3.2lf", veclocity_tacho);
-    print_string1216("  km/h  ", 380, 225, COLOR_BLACK, COLOR_YELLO);
-    print_string1216(buffer1, 410, 238, COLOR_BLACK, COLOR_YELLO);
+    if (veclocity_tacho < 11)
+    {
+        sprintf(buffer1, " %3.2lf   ", veclocity_tacho);
+    }
+    else if (veclocity_tacho < 101)
+    {
+        sprintf(buffer1, " %3.2lf   ", veclocity_tacho);
+    }
+    else
+    {
+        sprintf(buffer1, "%3.2lf   ", veclocity_tacho);
+    }
+
+    print_string1216(buffer1, 410, 238, COLOR_WHITE, COLOR_BLACK);
 
     sprintf(buffer2, "%3.2lf", distance_in_m);
     print_string1216(buffer2, 270, 700, COLOR_BLACK, COLOR_YELLO);
@@ -119,24 +130,26 @@ void Timer1_DisplayIntHandler(void)
     x_old = x;
     y_old = y;
 
-    if (move_direction == STATIONARY)
+    switch (move_direction)
     {
+    case STATIONARY:
         print_string1216("( )", 215, 700, COLOR_BLACK, COLOR_YELLO);
-    }
-    else if (move_direction == FORWARD)
-    {
+        print_string1216("  STOP  ", 450, 230, COLOR_RED, COLOR_BLACK);
+        break;
+    case FORWARD:
         print_string1216("(V)", 215, 700, COLOR_BLACK, COLOR_YELLO);
-    }
-    else if (move_direction == BACKWARD)
-    {
+        print_string1216(" FORWARD", 450, 230, COLOR_RED, COLOR_BLACK);
+        break;
+    case BACKWARD:
         print_string1216("(R)", 215, 700, COLOR_BLACK, COLOR_YELLO);
+        print_string1216("BACKWARD", 450, 230, COLOR_RED, COLOR_BLACK);
+        break;
+    default:
+        break;
     }
 
-    //printf("Geschwindigkeit ist : %lf km/h.\n",veclocity_tacho);
     S2counter = 0;
     move_direction = STATIONARY;
-    //display_layout();
-
 }
 
 void init_peripherals(void)
