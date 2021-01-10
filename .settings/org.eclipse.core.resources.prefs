@@ -1,8 +1,8 @@
 eclipse.preferences.version=1
+encoding//Debug/component/Initialization/subdir_rules.mk=UTF-8
+encoding//Debug/component/Initialization/subdir_vars.mk=UTF-8
 encoding//Debug/component/LCD/subdir_rules.mk=UTF-8
 encoding//Debug/component/LCD/subdir_vars.mk=UTF-8
-encoding//Debug/component/Sensor/Timer/subdir_rules.mk=UTF-8
-encoding//Debug/component/Sensor/Timer/subdir_vars.mk=UTF-8
 encoding//Debug/component/Sensor/subdir_rules.mk=UTF-8
 encoding//Debug/component/Sensor/subdir_vars.mk=UTF-8
 encoding//Debug/makefile=UTF-8

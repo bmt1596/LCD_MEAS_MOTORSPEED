@@ -1,11 +1,11 @@
 /*
- * init.c
+ * @file        : init.c
+ * @author      : Minh Tung Bui and Hauke Kosmiter
+ * @copyright   : HAW-Hamburg
  *
- *  Created on: 09.01.2021
- *      Author: Hauke
+ * In this file there are the functions for initiate the peripherals and variables
  */
-
-#include "init.h"
+#include <component/Initiation/init.h>
 
 void init_peripherals(void)
 {
@@ -49,9 +49,9 @@ void init_peripherals(void)
     // TIMER
     /********************************************************************************/
     // Configure Timer1 Interrupt
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1);    // Clock Gate enable TIMER1
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER1);                       // Clock Gate enable TIMER1
     TimerConfigure(TIMER1_BASE, TIMER_CFG_PERIODIC);
-    TimerLoadSet(TIMER1_BASE, TIMER_A, sysCLK / 2.5);      // fires every 200 ms
+    TimerLoadSet(TIMER1_BASE, TIMER_A, sysCLK / 2.5);                   // fires every 200 ms
     TimerIntRegister(TIMER1_BASE, TIMER_A, Timer1_DisplayIntHandler);
     IntEnable(INT_TIMER1A);
     TimerIntEnable(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
@@ -59,13 +59,16 @@ void init_peripherals(void)
 }
 
 void init_var(void){
+    // Variables for interrupt handler
     S1counter = 0;
     S2counter = 0;
 
+    // Variables for calculation in the timer function
     veclocity_tacho = 0;
     distance_in_m = 0;
     distance_in_km = 0;
 
+    // Toggle bool for direction determining
     toggle = true;
 }
 
