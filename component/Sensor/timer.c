@@ -6,6 +6,7 @@
  */
 
 #include "timer.h"
+#include <stdio.h>
 
 void Timer1_DisplayIntHandler(void)
 {
@@ -18,7 +19,7 @@ void Timer1_DisplayIntHandler(void)
 
     TimerIntClear(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
 
-    veclocity_tacho = (double) (S2counter * 1.151);
+    veclocity_tacho = (double) (S2counter * 1.341);
 
     if(veclocity_tacho > 180)
     {
@@ -29,16 +30,18 @@ void Timer1_DisplayIntHandler(void)
         {
             print_string1216("          ", 350, 220, COLOR_BLACK, COLOR_BLACK);
         }
-
-    }
-    else if (veclocity_tacho >= 240)
-    {
-        veclocity_tacho = 240;
     }
     else
     {
         print_string1216("          ", 350, 220, COLOR_BLACK, COLOR_BLACK);
     }
+
+    if (veclocity_tacho >= 240)
+    {
+        veclocity_tacho = 240;
+    }
+
+    printf("Speed is: %lf\n",veclocity_tacho);
 
     distance_in_m = distance_in_m + (double) (veclocity_tacho / 9);
     distance_in_km = (double) (distance_in_m / 1000);
