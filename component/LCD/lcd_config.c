@@ -1,27 +1,53 @@
 /*
- * lcd.c
- *
- *  Created on: 15 Nov 2020
- *      Author: minht
+ * @file        : lcd_config.c
+ * @author      : Minh Tung Bui and Hauke Kosmiter
+ * @copyright   : HAW-Hamburg
+ * @addtogroup  : component/LCD
+ * @{
  */
-
-
 #include <component/LCD/lcd_config.h>
 #include "fontscharacter.h"
 
-int x = 0;
-int y = 0;
 
-/********************************************************************************
-     Elementary output functions  => speed optimized as inline
-*********************************************************************************/
+/**********************************************************************************
+   * @brief     function to config Port M, L and init for LCD display
+   * @details   void
+   * @returns   void
+ */
+inline void init_and_config_display(void)
+{
+    // Set Port M Pins 0-7: used as Output of LCD Data
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOM);            // enable clock-gate Port M
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOM));     // wait until clock ready
+    GPIOPinTypeGPIOOutput(GPIO_PORTM_BASE, 0xFF);
+
+    // Set Port L Pins 0-4: used as Output of LCD Control signals:
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOL);            // Clock Port Q
+    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOL));
+    GPIOPinTypeGPIOOutput(GPIO_PORTL_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3| GPIO_PIN_4);
+
+    // initalize and  configuration
+    configure_display_controller_large();
+}
+/********************************************************************************/
+
+/**********************************************************************************
+   * @brief     function to write command byte on Port M and select chip
+   * @details   void
+   * @returns   void
+ */
 void write_command(unsigned char command)
 {
     GPIO_PORTM_DATA_R = command;        // Write command byte
     GPIO_PORTL_DATA_R = 0x11;           // Chip select = 0, Command mode select = 0, Write state = 0
     GPIO_PORTL_DATA_R = 0x1F;           // Initial state
 }
-/********************************************************************************/
+
+/**********************************************************************************
+   * @brief     function to write data byte on Port M and select chip
+   * @details   void
+   * @returns   void
+ */
 inline void write_data(unsigned char data)
 {
 
@@ -29,7 +55,12 @@ inline void write_data(unsigned char data)
     GPIO_PORTL_DATA_R = 0x15;           // Chip select = 0, Write state = 0
     GPIO_PORTL_DATA_R = 0x1F;           // Initial state
 }
-/********************************************************************************/
+
+/**********************************************************************************
+   * @brief     function to set the frame to be displayed on the LCD
+   * @details   int min_x,int min_y,int max_x,int max_y
+   * @returns   void
+ */
 inline void window_set(int min_x,int min_y,int max_x,int max_y)
 {
     write_command(0x2A);           // Set row address x-axis
@@ -45,7 +76,11 @@ inline void window_set(int min_x,int min_y,int max_x,int max_y)
     write_data(max_y);             // as above                     (low byte)
 }
 
-/********************************************************************************/
+/**********************************************************************************
+   * @brief     function to set configure for small display 480 x 272 pixel
+   * @details   void
+   * @returns   void
+ */
 void configure_display_controller_small (void) // 480 x 272 pixel
 {
     GPIO_PORTL_DATA_R = INITIAL_STATE;      // Initial state of display control signals
@@ -120,25 +155,14 @@ void configure_display_controller_small (void) // 480 x 272 pixel
 
     write_command(SET_DISPLAY_ON);           // Set display on  manual p. 78
 }
-/********************************************************************************/
-inline void init_and_config_display(void)
-{
-    // Set Port M Pins 0-7: used as Output of LCD Data
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOM);            // enable clock-gate Port M
-    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOM));     // wait until clock ready
-    GPIOPinTypeGPIOOutput(GPIO_PORTM_BASE, 0xFF);
-    // Set Port L Pins 0-4: used as Output of LCD Control signals:
-    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOL);  // Clock Port Q
-    while(!SysCtlPeripheralReady(SYSCTL_PERIPH_GPIOL));
-    GPIOPinTypeGPIOOutput(GPIO_PORTL_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3| GPIO_PIN_4);
 
-    configure_display_controller_large();  // initalize and  configuration
-}
-/********************************************************************************/
-
+/**********************************************************************************
+   * @brief     function to set configure for large display 480 x 800 pixel
+   * @details   void
+   * @returns   void
+ */
 void configure_display_controller_large (void) // 800 x 480 pixel ???
 {
-//////////////////////////////////////////////////////////////////////////////////
     GPIO_PORTL_DATA_R = INITIAL_STATE;      // Initial state
     GPIO_PORTL_DATA_R &= ~RST;              // Hardware reset
     SysCtlDelay(10000);                     // wait >1 ms
@@ -169,24 +193,24 @@ void configure_display_controller_large (void) // 800 x 480 pixel ???
     write_data(0x70);                       // KRR
     write_data(0xA3);                       // KRR
 
-    write_command(SET_LCD_MODE);          // SET LCD MODE SIZE, manual p. 44
-    write_data(0x20);                     // ..TFT panel 24bit
-    write_data(0x00);                     // ..TFT mode
-    write_data(0x03);                     // SET horizontal size = 800-1 (high byte)
-    write_data(0x1F);                     // SET horizontal size = 800-1 (low byte)
-    write_data(0x01);                     // Set vertical size = 480-1 (high byte)
-    write_data(0xDF);                     // Set vertical size = 480-1 (low byte)
-    write_data(0x00);                     // Even line RGB sequence / Odd line RGB sequence RGB
+    write_command(SET_LCD_MODE);            // SET LCD MODE SIZE, manual p. 44
+    write_data(0x20);                       // ..TFT panel 24bit
+    write_data(0x00);                       // ..TFT mode
+    write_data(0x03);                       // SET horizontal size = 800-1 (high byte)
+    write_data(0x1F);                       // SET horizontal size = 800-1 (low byte)
+    write_data(0x01);                       // Set vertical size = 480-1 (high byte)
+    write_data(0xDF);                       // Set vertical size = 480-1 (low byte)
+    write_data(0x00);                       // Even line RGB sequence / Odd line RGB sequence RGB
 
-    write_command(SET_HORI_PERIOD);       // Set Horizontal Period
-    write_data(0x03);                     // Horizontal total period (display + non-displayed)  (high byte)
-    write_data(0x5E);                     // Horizontal total period (display + non-display) (low byte)
-    write_data(0x00);                     // Non-displayed period between the start of the horizontal sync (LLINE) signal and the first displayed data.
-    write_data(0x46);                     // Low byte of the non-display period between the start of the horizontal sync (LLINE) signal and the first display data
-    write_data(0x09);                     // Set the vertical sync width
-    write_data(0x00);                     // Set horiz.Sync pulse start    (high byte)
-    write_data(0x08);                     // Set horiz.Sync pulse start    (low byte)
-    write_data(0x00);                     //
+    write_command(SET_HORI_PERIOD);         // Set Horizontal Period
+    write_data(0x03);                       // Horizontal total period (display + non-displayed)  (high byte)
+    write_data(0x5E);                       // Horizontal total period (display + non-display) (low byte)
+    write_data(0x00);                       // Non-displayed period between the start of the horizontal sync (LLINE) signal and the first displayed data.
+    write_data(0x46);                       // Low byte of the non-display period between the start of the horizontal sync (LLINE) signal and the first display data
+    write_data(0x09);                       // Set the vertical sync width
+    write_data(0x00);                       // Set horiz.Sync pulse start    (high byte)
+    write_data(0x08);                       // Set horiz.Sync pulse start    (low byte)
+    write_data(0x00);                       //
 
 
     write_command(SET_VERT_PERIOD);         // Set vertical periods, manual  p. 49
@@ -205,61 +229,95 @@ void configure_display_controller_large (void) // 800 x 480 pixel ???
 //  write_command(0x0A);                    // Power control mode not tested in detail
 //  write_data(0x1C);
 
-    write_command(SET_PIXEL_DATA_FORMAT);    // set pixel data format 8bit manual p. 78
+    write_command(SET_PIXEL_DATA_FORMAT);   // set pixel data format 8bit manual p. 78
     write_data(0x00);
 
-    write_command(SET_DISPLAY_ON);           // Set display on  manual p. 78
+    write_command(SET_DISPLAY_ON);          // Set display on  manual p. 78
 }
+
+/**********************************************************************************
+   * @brief     function to set the color for background
+   * @details   the frame is 480 x 800 pixel
+   * @returns   void
+ */
 
 void set_background_color(int color)
 {
     int x, y;
     printf("Start Background Pixel by Pixel set\n"); // for debug only
+
     // set pixel by pixel to change the background colors
-    window_set(0, 0, MAX_X - 1, MAX_Y - 1); // set single position see B.4  // to do faster ?
-    write_command(0x2C); //write pixel command
+    // set single position see B.4  // to do faster ?
+    window_set(0, 0, MAX_X - 1, MAX_Y - 1);
+    write_command(0x2C);                            //write pixel command
+
     for (x = 0; x <= (MAX_X) - 1; x++)
         for (y = 0; y <= (MAX_Y) - 1; y++)
+        {
+            write_data((color >> 16) & 0xff);       // red
+            write_data((color >> 8) & 0xff);        // green
+            write_data((color) & 0xff);             // blue
+        }
+
+    printf("Background ready \n");                  // for debug only
+}
+
+/**********************************************************************************
+   * @brief     function to draw the horizontal line with color
+   * @details   x1 (x-start), x2 (x-stop), y , color , px (size)
+   * @returns   void
+ */
+void drawline_H(short x1, short x2, short y, int color , int px)
+{
+    int x, y_i;
+
+    // set the frame and command
+    window_set(x1, y, x2, y + px);
+    write_command(0x2C);
+
+    // display pixels on screen
+    for(x = x1; x <= x2; x++)
+    {
+        for (y_i = y; y_i <= y + px; y_i ++)
         {
             write_data((color >> 16) & 0xff);   // red
             write_data((color >> 8) & 0xff);    // green
             write_data((color) & 0xff);         // blue
         }
-    printf("Background ready \n"); // for debug only
-}
-
-void drawline_H(short x1, short x2, short y, int color , int px)
-{
-    int x, y_i;
-    window_set(x1, y, x2, y + px);
-    write_command(0x2C);
-    for(x = x1; x <= x2; x++)
-    {
-        for (y_i = y; y_i <= y + px; y_i ++)
-        {
-            write_data((color >> 16) & 0xff); // red
-            write_data((color >> 8) & 0xff); // green
-            write_data((color) & 0xff); // blue
-        }
     }
 }
 
+/**********************************************************************************
+   * @brief     function to draw the vertical line with color
+   * @details   y1 (y-start), y2 (y-stop), x , color , px (size)
+   * @returns   void
+ */
 void drawline_V(short y1, short y2, short x, int color , int px)
 {
     int x_i, y;
+
+    // set the frame and command
     window_set(x, y1, x + px, y2);
     write_command(0x2C);
+
+    // display pixels on screen
     for (x_i = x; x_i <= x + px; x_i ++)
     {
         for(y = y1; y <= y2; y++)
         {
-            write_data((color >> 16) & 0xff); // red
-            write_data((color >> 8) & 0xff);// green
-            write_data((color) & 0xff);// blue
+            write_data((color >> 16) & 0xff);   // red
+            write_data((color >> 8) & 0xff);    // green
+            write_data((color) & 0xff);         // blue
         }
     }
 }
 
+
+/**********************************************************************************
+   * @brief     function to write a cicle on screen
+   * @details   x (center x), y (center y ), radius, color)
+   * @returns   void
+ */
 void drawCircle(int x, int y, int radius, int color)
 {
     int f = 1 - radius;
@@ -272,28 +330,28 @@ void drawCircle(int x, int y, int radius, int color)
     window_set(x, y + radius, x, y + radius);
     write_command(0x2C);
 
-    write_data((color >> 16) & 0xff); // red
-    write_data((color >> 8) & 0xff); // green
-    write_data((color) & 0xff); // blue
+    write_data((color >> 16) & 0xff);       // red
+    write_data((color >> 8) & 0xff);        // green
+    write_data((color) & 0xff);             // blue
 
     window_set(x, y - radius, x, y - radius);
     write_command(0x2C);
-    write_data((color >> 16) & 0xff); // red
-    write_data((color >> 8) & 0xff); // green
-    write_data((color) & 0xff); // blue
+    write_data((color >> 16) & 0xff);       // red
+    write_data((color >> 8) & 0xff);        // green
+    write_data((color) & 0xff);             // blue
 
     window_set(x + radius, y, x + radius, y);
     write_command(0x2C);
-    write_data((color >> 16) & 0xff); // red
-    write_data((color >> 8) & 0xff); // green
-    write_data((color) & 0xff); // blue
+    write_data((color >> 16) & 0xff);       // red
+    write_data((color >> 8) & 0xff);        // green
+    write_data((color) & 0xff);             // blue
 
 
     window_set(x - radius, y, x - radius, y);
     write_command(0x2C);
-    write_data((color >> 16) & 0xff); // red
-    write_data((color >> 8) & 0xff); // green
-    write_data((color) & 0xff); // blue
+    write_data((color >> 16) & 0xff);       // red
+    write_data((color >> 8) & 0xff);        // green
+    write_data((color) & 0xff);             // blue
 
 
     while (x1 < y1)
@@ -310,70 +368,82 @@ void drawCircle(int x, int y, int radius, int color)
 
         window_set(x + x1, y + y1, x + x1, y + y1);
         write_command(0x2C);
-        write_data((color >> 16) & 0xff); // red
-        write_data((color >> 8) & 0xff); // green
-        write_data((color) & 0xff); // blue
+        write_data((color >> 16) & 0xff);   // red
+        write_data((color >> 8) & 0xff);    // green
+        write_data((color) & 0xff);         // blue
 
 
         window_set(x - x1, y + y1, x - x1, y + y1);
         write_command(0x2C);
-        write_data((color >> 16) & 0xff); // red
-        write_data((color >> 8) & 0xff); // green
-        write_data((color) & 0xff); // blue
+        write_data((color >> 16) & 0xff);   // red
+        write_data((color >> 8) & 0xff);    // green
+        write_data((color) & 0xff);         // blue
 
 
         window_set(x + x1, y - y1, x + x1, y - y1);
         write_command(0x2C);
-        write_data((color >> 16) & 0xff); // red
-        write_data((color >> 8) & 0xff); // green
-        write_data((color) & 0xff); // blue
+        write_data((color >> 16) & 0xff);   // red
+        write_data((color >> 8) & 0xff);    // green
+        write_data((color) & 0xff);         // blue
 
 
         window_set(x - x1, y - y1, x - x1, y - y1);
         write_command(0x2C);
-        write_data((color >> 16) & 0xff); // red
-        write_data((color >> 8) & 0xff); // green
-        write_data((color) & 0xff); // blue
+        write_data((color >> 16) & 0xff);   // red
+        write_data((color >> 8) & 0xff);    // green
+        write_data((color) & 0xff);         // blue
 
 
         window_set(x + y1, y + x1, x + y1, y + x1);
         write_command(0x2C);
-        write_data((color >> 16) & 0xff); // red
-        write_data((color >> 8) & 0xff); // green
-        write_data((color) & 0xff); // blue
+        write_data((color >> 16) & 0xff);   // red
+        write_data((color >> 8) & 0xff);    // green
+        write_data((color) & 0xff);         // blue
 
 
         window_set(x - y1, y + x1, x - y1, y + x1);
         write_command(0x2C);
-        write_data((color >> 16) & 0xff); // red
-        write_data((color >> 8) & 0xff); // green
-        write_data((color) & 0xff); // blue
+        write_data((color >> 16) & 0xff);   // red
+        write_data((color >> 8) & 0xff);    // green
+        write_data((color) & 0xff);         // blue
 
 
         window_set(x + y1, y - x1, x + y1, y - x1);
         write_command(0x2C);
-        write_data((color >> 16) & 0xff); // red
-        write_data((color >> 8) & 0xff); // green
-        write_data((color) & 0xff); // blue
+        write_data((color >> 16) & 0xff);   // red
+        write_data((color >> 8) & 0xff);    // green
+        write_data((color) & 0xff);         // blue
 
 
         window_set(x - y1, y - x1, x - y1, y - x1);
         write_command(0x2C);
-        write_data((color >> 16) & 0xff); // red
-        write_data((color >> 8) & 0xff); // green
-        write_data((color) & 0xff); // blue
+        write_data((color >> 16) & 0xff);   // red
+        write_data((color >> 8) & 0xff);    // green
+        write_data((color) & 0xff);         // blue
     }
 }
 
+/**********************************************************************************
+   * @brief     function to write a cicle with size on screen
+   * @details   x (center x), y (center y ), radius, color) , px (size)
+   * @returns   void
+ */
 void drawCircle_px(int x, int y, int radius, int color, int px)
 {
     int i;
+
+    // display more circle with different size
     for ( i = radius; i >= radius - px; i--)
     {
         drawCircle(x, y, i, color);
     }
 }
 
+/**********************************************************************************
+   * @brief     function to write the character on screen
+   * @details   w (character), color1 (color for character), color2 (background color)
+   * @returns   void
+ */
 void write_char(int w, int color, int backcolor)
 {
     int lv;
@@ -381,20 +451,25 @@ void write_char(int w, int color, int backcolor)
     {
         if (w & 1)
         {
-            write_data((color >> 16) & 0xff); // red
-            write_data((color >> 8) & 0xff); // green
-            write_data((color) & 0xff); // blue
+            write_data((color >> 16) & 0xff);       // red
+            write_data((color >> 8) & 0xff);        // green
+            write_data((color) & 0xff);             // blue
         }
         else
         {
-            write_data((backcolor >> 16) & 0xff); // red
-            write_data((backcolor >> 8) & 0xff); // green
-            write_data((backcolor) & 0xff); // blue
+            write_data((backcolor >> 16) & 0xff);   // red
+            write_data((backcolor >> 8) & 0xff);    // green
+            write_data((backcolor) & 0xff);         // blue
         }
         w = w>>1;
     }
 }
 
+/**********************************************************************************
+   * @brief     function to write the string on screen
+   * @details   *text (text), row,  column,  color,  backcolor)
+   * @returns   void
+ */
 void print_string1216(char *text, int row, int column, int color, int backcolor)
 {
     int w;
@@ -422,8 +497,11 @@ void print_string1216(char *text, int row, int column, int color, int backcolor)
     }
 }
 
-/******************************************************************************************************/
-//draws a line from startpoint x to stoppoint y directly to the display
+/**********************************************************************************
+   * @brief     function to write a normal line
+   * @details   x1 (x start),  y1 (y start),  x2 (stop), y2 (stop), color
+   * @returns   void
+ */
 void drawline(short x1, short y1, short x2, short y2, int color)
 {
     short old_x, old_y, x, y, i;
@@ -433,8 +511,9 @@ void drawline(short x1, short y1, short x2, short y2, int color)
     // 90° line:
     if (x1 == x2)
     {
+        // 90° from DOWN to UP   else: 270° from UP to DOWN
         if (y1 > y2)
-        {        // 90° from DOWN to UP   else: 270° from UP to DOWN
+        {
             start_y = y2;
             stop_y = y1;
         }
@@ -447,9 +526,9 @@ void drawline(short x1, short y1, short x2, short y2, int color)
         write_command(0x2C);
         for (x = start_y; x <= stop_y; x++)
         {
-            write_data((color >> 16) & 0xff); // red
-            write_data((color >> 8) & 0xff); // green
-            write_data((color) & 0xff); // blue
+            write_data((color >> 16) & 0xff);   // red
+            write_data((color >> 8) & 0xff);    // green
+            write_data((color) & 0xff);         // blue
         }
     }
     // 0° line:
@@ -469,16 +548,17 @@ void drawline(short x1, short y1, short x2, short y2, int color)
         write_command(0x2C);
         for (x = start_x; x <= stop_x; x++)
         {
-            write_data((color >> 16) & 0xff); // red
-            write_data((color >> 8) & 0xff); // green
-            write_data((color) & 0xff); // blue
+            write_data((color >> 16) & 0xff);   // red
+            write_data((color >> 8) & 0xff);    // green
+            write_data((color) & 0xff);         // blue
         }
     }
-/////////////////////////////////////////////////////////////////////////////////////////
+/****************************************************************************/
     else
     {
+        // running direction is negative ! => switch start and stop
         if (x1 > x2)
-        {      // running direction is negative ! => switch start and stop
+        {
             start_x = x2;
             stop_x = x1;
             start_y = y2;
@@ -523,9 +603,9 @@ void drawline(short x1, short y1, short x2, short y2, int color)
                 write_command(0x2C);
                 for (i = old_x; i <= x; i++)
                 {
-                    write_data((color >> 16) & 0xff); // red
-                    write_data((color >> 8) & 0xff); // green
-                    write_data((color) & 0xff); // blue
+                    write_data((color >> 16) & 0xff);   // red
+                    write_data((color >> 8) & 0xff);    // green
+                    write_data((color) & 0xff);         // blue
                 }
                 old_x = x;
             }
@@ -542,9 +622,9 @@ void drawline(short x1, short y1, short x2, short y2, int color)
                 write_command(0x2C);
                 for (i = y; i <= old_y; i++)
                 {
-                    write_data((color >> 16) & 0xff); // red
-                    write_data((color >> 8) & 0xff); // green
-                    write_data((color) & 0xff); // blue
+                    write_data((color >> 16) & 0xff);   // red
+                    write_data((color >> 8) & 0xff);    // green
+                    write_data((color) & 0xff);         // blue
                 }
                 old_y = y;
             }
@@ -561,9 +641,9 @@ void drawline(short x1, short y1, short x2, short y2, int color)
                 write_command(0x2C);
                 for (i = old_x; i <= x; i++)
                 {
-                    write_data((color >> 16) & 0xff); // red
-                    write_data((color >> 8) & 0xff); // green
-                    write_data((color) & 0xff); // blue
+                    write_data((color >> 16) & 0xff);   // red
+                    write_data((color >> 8) & 0xff);    // green
+                    write_data((color) & 0xff);         // blue
                 }
                 old_x = x;
             }

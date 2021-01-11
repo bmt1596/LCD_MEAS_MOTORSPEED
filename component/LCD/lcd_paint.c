@@ -1,12 +1,19 @@
 /*
- * lcd_paint.c
- *
- *  Created on: 2 Dec 2020
- *      Author: minht
+ * @file        : lcd_paint.c
+ * @author      : Minh Tung Bui and Hauke Kosmiter
+ * @copyright   : HAW-Hamburg
+ * @addtogroup  : component/LCD
+ * @{
  */
+
 #include <component/LCD/lcd_paint.h>
 #include <component/LCD/lcd_config.h>
 
+/**********************************************************************************
+   * @brief     function to display the layout of Tacho
+   * @details   void
+   * @returns   void
+ */
 void display_layout(void)
 {
     // display information for MC project and team
@@ -51,6 +58,9 @@ void display_layout(void)
     // display gold circle
     drawCircle_px(X_CENTER, Y_CENTER, 222, COLOR_YELLO, 3);
 
+    // outside red circle
+     drawCircle_px(X_CENTER, Y_CENTER, 245, COLOR_RED, 1);
+
     // unter black line
     drawline_H(0, 550, 390, COLOR_BLACK, 100);
 
@@ -65,13 +75,22 @@ void display_layout(void)
 
     // display under black line
     drawline_H(0, 550, 470, COLOR_BLACK, 10);
-    drawline_H(154, 395, 470, COLOR_BLACK, 3);
+    drawline_H(154, 395, 470, COLOR_WHITE, 3);
+    drawline_H(154, 395, 400, COLOR_WHITE, 1);
+    drawline_V(400, 470, 154, COLOR_WHITE, 1);
+    drawline_V(400, 470, 154, COLOR_WHITE, 1);
+    drawline_V(400, 470, 395, COLOR_WHITE, 1);
 }
 
-
+/**********************************************************************************
+   * @brief     function to display the information about project
+   * @details   void
+   * @returns   void
+ */
 void display_project_information(void)
 {
     set_background_color(COLOR_BLACK);
+
     drawline_H(551, 800, 170, COLOR_WHITE, 2);
     drawline_V(0, 480, 550, COLOR_WHITE, 2);
     // for unter line
@@ -89,6 +108,31 @@ void display_project_information(void)
                     105, 565, COLOR_WHITE, COLOR_BLACK);
     print_string1216("2. Hauke Kosmiter",
                         125, 565, COLOR_WHITE, COLOR_BLACK);
+
+    print_string1216("Fahzeug", 180, 630, COLOR_WHITE, COLOR_BLACK);
+
+    print_string1216("- Richtung", 215, 565, COLOR_WHITE, COLOR_BLACK);
+    print_string1216("- Kilometerstand:", 245, 565, COLOR_WHITE, COLOR_BLACK);
+    print_string1216("  in m:", 270, 565, COLOR_WHITE, COLOR_BLACK);
+    print_string1216("  in km:",295, 565, COLOR_WHITE, COLOR_BLACK);
+
+    // HAW Logo
+    drawline_H(555, 795, 350, COLOR_LOGO_BACKGROUND, 80);
+
+    drawline_H(560, 600, 360, COLOR_BLUE_HAW, 3);
+    drawline_H(560, 600, 374, COLOR_BLUE_HAW, 3);
+    drawline_H(560, 600, 388, COLOR_BLUE_HAW, 3);
+    drawline_H(560, 600, 402, COLOR_BLUE_HAW, 3);
+
+    drawline_H(580, 620, 367, COLOR_BLUE, 3);
+    drawline_H(580, 620, 381, COLOR_BLUE, 3);
+    drawline_H(580, 620, 395, COLOR_BLUE, 3);
+    drawline_H(580, 620, 409, COLOR_BLUE, 3);
+
+    print_string1216("H A W", 370, 630, COLOR_BLUE, COLOR_LOGO_BACKGROUND);
+    print_string1216("H A M B U R G", 395, 630, COLOR_BLUE, COLOR_LOGO_BACKGROUND);
+    // Datum
+    print_string1216("19.01.2021", 450, 670, COLOR_WHITE, COLOR_BLACK);
 }
 
 
