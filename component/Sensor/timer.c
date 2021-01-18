@@ -19,7 +19,7 @@ void Timer1_DisplayIntHandler(void)
 
     TimerIntClear(TIMER1_BASE, TIMER_TIMA_TIMEOUT);
 
-    veclocity_tacho = (double) (S2counter * 1.341);
+    veclocity_tacho = (double) (S2counter * 1.151);
 
     if(veclocity_tacho > 180)
     {
@@ -41,10 +41,12 @@ void Timer1_DisplayIntHandler(void)
         veclocity_tacho = 240;
     }
 
-    printf("Speed is: %lf\n",veclocity_tacho);
+
 
     distance_in_m = distance_in_m + (double) (veclocity_tacho / 9);
     distance_in_km = (double) (distance_in_m / 1000);
+
+    printf("RPM : %.0ld \t\t Geschwindigkeit: %.2lf km/h \t\t Strecke: %.3lf km\n",S2counter,veclocity_tacho,distance_in_km);
 
     if (veclocity_tacho < 11)
     {
